@@ -32,11 +32,11 @@
 
 ### 系统与运维
 
-- Docker容器技术 [计划中] - 容器化应用开发与部署
-- Kubernetes集群管理 [计划中] - 容器编排与集群管理
-- Windows系统管理 [计划中] - Windows服务器与工作站配置
-- 网络配置与管理 [计划中] - 企业网络规划与实施
-- [Linux系统管理](./docs/systems/linux/README.md) [已完成]
+- [Docker 容器技术](./docs/docker/README.md) - 容器化应用开发与部署
+- [Kubernetes 集群管理](./docs/k8s/README.md) - 容器编排与集群管理
+- [Windows 系统管理](./docs/systems/windows/README.md) - Windows服务器与工作站配置
+- [Linux 系统管理](./docs/systems/linux/README.md) - 从基础到高级的 Linux 系统管理知识
+- [网络配置与管理](./docs/networking/README.md) - 企业网络规划与实施
 
 ### 数据库与存储
 
@@ -204,6 +204,20 @@ C/C++语言文档已完成一份全面的指南，覆盖了从C语言基础到�
 这份深度指南为开发者提供了从底层系统编程到利用现代C++特性构建高性能应用的完整知识体系。
 
 查看详情：[C/C++文档](docs/programming/c-cpp/README.md)
+
+### Kubernetes集群管理 ✅ 完成
+
+Kubernetes集群管理文档已全部完成，包含从基础到实战的全面内容：
+- 基础概念与本地环境搭建
+- Pods, Deployments, Services, Namespaces 等核心工作负载
+- 配置、存储、网络和安全策略
+- StatefulSets, DaemonSets, Jobs 等高级工作负载
+- Helm 包管理与应用可观测性
+- 部署三层应用的完整实战案例
+
+这份全面的指南为学习者提供了系统化的学习路径，以掌握容器编排和大规模应用管理。
+
+查看详情：[Kubernetes文档](./docs/k8s/README.md)
 
 ## 文档内容
 
