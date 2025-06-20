@@ -24,21 +24,21 @@
 
 ### 🌐 Part 3: 路由技术 (Routing Technologies)
 
-- [ ] 9. [静态路由](./static-routing.md)
-- [ ] 10. [动态路由协议入门](./dynamic-routing-intro.md)
-- [ ] 11. [RIP 和 EIGRP](./rip-eigrp.md)
-- [ ] 12. [OSPF](./ospf.md)
-- [ ] 13. [BGP 基础](./bgp-basics.md)
+- [√] 9. [静态路由](./static-routing.md)
+- [√] 10. [动态路由协议入门](./dynamic-routing-intro.md)
+- [√] 11. [RIP 和 EIGRP](./rip-eigrp.md)
+- [√] 12. [OSPF](./ospf.md)
+- [√] 13. [BGP 基础](./bgp-basics.md)
 
 ### 🛡️ Part 4: 网络服务与安全 (Network Services & Security)
 
-- [ ] 14. [DHCP](./dhcp.md)
-- [ ] 15. [DNS](./dns.md)
-- [ ] 16. [NAT](./nat.md)
-- [ ] 17. [访问控制列表 (ACLs)](./acls.md)
-- [ ] 18. [VPN 技术](./vpn.md)
+- [√] 14. [DHCP](./dhcp.md)
+- [√] 15. [DNS](./dns.md)
+- [√] 16. [NAT](./nat.md)
+- [√] 17. [访问控制列表 (ACLs)](./acls.md)
+- [√] 18. [VPN 技术](./vpn.md)
 
 ### 🚀 Part 5: 高级主题与管理 (Advanced Topics & Management)
 
-- [ ] 19. [网络监控与管理 (SNMP & NetFlow)](./monitoring.md)
-- [ ] 20. [无线局域网 (WLAN)](./wlan.md) 
+- [√]  19. [网络监控与管理 (SNMP & NetFlow)](./monitoring.md)
+- [√]  20. [无线局域网 (WLAN)](./wlan.md) 

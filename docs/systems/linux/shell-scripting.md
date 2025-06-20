@@ -1,219 +1,394 @@
-# 8. Shell 脚本编程
+# Shell 脚本编程
 
-Shell 脚本是将一系列 Linux 命令按顺序组织在一个文本文件中，以便一次性执行。它是自动化日常任务、简化复杂操作和进行系统管理的基石。通过编写脚本，你可以将重复性的工作交给计算机完成。
+Shell 脚本是 Linux/Unix 系统中非常强大的工具，允许用户自动化日常任务、批处理命令和简化系统管理。本文将介绍 Bash（Bourne Again SHell）脚本编程的基础知识和常用技巧。
 
-本章将介绍 Bash (Bourne Again SHell) 脚本的基础知识，Bash 是绝大多数 Linux 发行版中默认的 Shell。
+## 基础知识
 
-## 什么是 Shell 脚本？
+### 创建和执行脚本
 
-- 一个包含 Shell 命令的纯文本文件。
-- 它可以像普通程序一样被执行。
-- 用于自动化，例如：
-    - 自动备份文件。
-    - 监控系统状态（如磁盘空间、内存使用）。
-    - 批量处理文件（如重命名、转换格式）。
-    - 简化自定义命令的执行。
-
-## 创建第一个脚本
-
-1.  **创建文件**: 使用文本编辑器（如 `nano` 或 `vim`）创建一个新文件，通常以 `.sh` 结尾（这不是必需的，但有助于识别）。
-    ```bash
-    nano my_script.sh
-    ```
-
-2.  **添加 Shebang**: 在脚本的第一行，添加 "shebang"。它告诉系统应该使用哪个解释器来执行这个脚本。对于 Bash 脚本，它总是：
-    ```bash
-    #!/bin/bash
-    ```
-
-3.  **添加命令**: 在 shebang 下方，添加你想要执行的命令。
-    ```bash
-    #!/bin/bash
-    # 这是一个注释
-    echo "Hello, World!"
-    echo "当前日期是: $(date)"
-    ```
-
-4.  **授予执行权限**: 新创建的脚本文件默认没有执行权限。你需要使用 `chmod` 来添加它。
-    ```bash
-    chmod 755 my_script.sh
-    # 或者
-    chmod u+x my_script.sh
-    ```
-
-5.  **运行脚本**:
-    ```bash
-    # 如果你在脚本所在的目录，需要使用 ./ 来指定当前目录
-    ./my_script.sh
-
-    # 输出:
-    # Hello, World!
-    # 当前日期是: Tue Jul 16 14:20:00 UTC 2024
-    ```
-
-## 变量 (Variables)
-
-在 Shell 脚本中，你可以定义变量来存储数据。
-
-### 定义变量
-- 语法: `VARIABLE_NAME="value"`
-- **注意**:
-    - 变量名、等号和值之间**不能有空格**。
-    - 按照惯例，变量名通常使用大写字母。
-    - 值如果包含空格，必须用引号引起来。
-
+1. 创建脚本文件：
 ```bash
-#!/bin/bash
-
-GREETING="你好, Linux 世界"
-USER_NAME="Alice"
+touch myscript.sh
 ```
 
-### 使用变量
-- 在变量名前加上美元符号 `$` 来引用它的值。
-- 推荐将变量引用放在双引号中，以防止因变量值包含空格或特殊字符而引发问题。
-
+2. 添加执行权限：
 ```bash
-#!/bin/bash
-
-GREETING="你好, Linux 世界"
-USER_NAME="Alice"
-
-echo "$GREETING"
-echo "欢迎, $USER_NAME"
-echo "我正在使用 $SHELL" # $SHELL 是一个系统内置的环境变量
+chmod +x myscript.sh
 ```
 
-### 命令替换 (Command Substitution)
-你可以将一个命令的输出结果赋值给一个变量。使用 `$(command)` 语法。
-
+3. 编辑脚本，添加 shebang 行：
 ```bash
 #!/bin/bash
-
-CURRENT_DIR=$(pwd)
-FILE_COUNT=$(ls -l | wc -l)
-
-echo "你现在在 $CURRENT_DIR 目录."
-echo "这个目录里有 $FILE_COUNT 个文件和子目录."
+echo "Hello, World!"
 ```
 
-## 位置参数 (Positional Parameters)
+4. 执行脚本：
+```bash
+./myscript.sh
+```
 
-脚本可以接收在运行时传递给它的参数。在脚本内部，这些参数通过特殊变量访问：
-- `$0`: 脚本本身的名称。
-- `$1`: 第一个参数。
-- `$2`: 第二个参数，以此类推。
-- `$#`: 传递给脚本的参数总数。
-- `$@` 或 `$*`: 所有参数的列表。
+### 脚本结构
 
-**示例 (`greet_user.sh`)**:
+一个良好的 shell 脚本通常包含以下部分：
+
 ```bash
 #!/bin/bash
 
-# 检查参数数量是否正确
-if [ $# -ne 2 ]; then
-    echo "用法: $0 <名字> <城市>"
+# 脚本描述和版本信息
+# 作者：xxx
+# 日期：yyyy-mm-dd
+# 版本：1.0
+# 描述：这个脚本的用途
+
+# 定义变量
+LOG_FILE="/var/log/myscript.log"
+MAX_RETRIES=5
+
+# 定义函数
+log_message() {
+    echo "$(date): $1" >> "$LOG_FILE"
+}
+
+# 主程序逻辑
+log_message "脚本开始执行"
+# ...其他命令...
+log_message "脚本执行完成"
+
+exit 0  # 成功退出
+```
+
+## 变量
+
+### 变量定义和使用
+
+```bash
+# 定义变量（注意等号两边不能有空格）
+name="John"
+age=30
+current_date=$(date +%Y-%m-%d)
+
+# 使用变量（使用$前缀）
+echo "Name: $name"
+echo "Age: $age"
+echo "Today is $current_date"
+
+# 变量作用域
+local_var="仅在函数内可见"  # 局部变量，需要在函数内使用 local 关键字
+global_var="全局可见"      # 全局变量
+```
+
+### 特殊变量
+
+```bash
+$0    # 脚本名称
+$1    # 第一个参数
+$2    # 第二个参数
+$@    # 所有参数（作为独立的单词）
+$*    # 所有参数（作为单个字符串）
+$#    # 参数个数
+$?    # 上一个命令的退出状态
+$$    # 当前脚本的进程 ID
+$!    # 最后一个后台进程的 ID
+```
+
+### 环境变量
+
+```bash
+echo "Home directory: $HOME"
+echo "Current user: $USER"
+echo "Shell path: $SHELL"
+echo "PATH: $PATH"
+```
+
+## 控制结构
+
+### 条件语句
+
+```bash
+# if-else 语句
+if [ "$age" -ge 18 ]; then
+    echo "成年人"
+elif [ "$age" -ge 13 ]; then
+    echo "青少年"
+else
+    echo "儿童"
+fi
+
+# case 语句
+case "$fruit" in
+    "apple")
+        echo "这是一个苹果"
+        ;;
+    "banana"|"plantain")
+        echo "这是一个香蕉"
+        ;;
+    *)
+        echo "未知水果"
+        ;;
+esac
+```
+
+### 循环语句
+
+```bash
+# for 循环
+for i in {1..5}; do
+    echo "Count: $i"
+done
+
+# while 循环
+count=1
+while [ $count -le 5 ]; do
+    echo "While count: $count"
+    ((count++))
+done
+
+# until 循环
+count=1
+until [ $count -gt 5 ]; do
+    echo "Until count: $count"
+    ((count++))
+done
+
+# break 和 continue
+for i in {1..10}; do
+    if [ $i -eq 3 ]; then
+        continue  # 跳过当前迭代
+    fi
+    if [ $i -eq 8 ]; then
+        break     # 退出循环
+    fi
+    echo "Iteration: $i"
+done
+```
+
+## 函数
+
+### 定义和调用函数
+
+```bash
+# 定义函数
+hello() {
+    echo "Hello, $1!"
+    return 0
+}
+
+# 调用函数
+hello "World"
+
+# 带参数和返回值的函数
+calculate() {
+    local result=$(($1 + $2))
+    echo $result
+    return 0
+}
+
+sum=$(calculate 5 3)
+echo "Sum: $sum"
+```
+
+## 文件操作
+
+### 文件测试
+
+```bash
+if [ -f "$file" ]; then
+    echo "普通文件存在"
+fi
+
+if [ -d "$directory" ]; then
+    echo "目录存在"
+fi
+
+if [ -r "$file" ]; then
+    echo "文件可读"
+fi
+
+if [ -w "$file" ]; then
+    echo "文件可写"
+fi
+
+if [ -x "$file" ]; then
+    echo "文件可执行"
+fi
+```
+
+### 读取文件
+
+```bash
+# 逐行读取文件
+while IFS= read -r line; do
+    echo "Line: $line"
+done < input.txt
+
+# 使用 cat 和管道
+cat input.txt | while read line; do
+    echo "Line: $line"
+done
+```
+
+## 字符串操作
+
+```bash
+# 字符串长度
+str="Hello, World!"
+echo "Length: ${#str}"
+
+# 子字符串提取
+echo "Substring: ${str:7:5}"  # 从索引7开始，长度为5
+
+# 字符串替换
+echo "Replace: ${str/World/Universe}"  # 替换第一个匹配
+echo "Replace all: ${str//l/L}"       # 替换所有匹配
+
+# 字符串判断
+if [[ "$str" == *"World"* ]]; then
+    echo "包含 'World'"
+fi
+
+# 大小写转换
+echo "Lowercase: ${str,,}"
+echo "Uppercase: ${str^^}"
+```
+
+## 数组
+
+```bash
+# 定义数组
+fruits=("apple" "banana" "cherry")
+
+# 访问数组元素
+echo "First fruit: ${fruits[0]}"
+
+# 数组长度
+echo "Number of fruits: ${#fruits[@]}"
+
+# 遍历数组
+for fruit in "${fruits[@]}"; do
+    echo "Fruit: $fruit"
+done
+
+# 添加元素
+fruits+=("orange")
+
+# 删除元素
+unset fruits[1]
+```
+
+## 错误处理
+
+```bash
+# 捕获错误
+set -e  # 任何命令失败时脚本退出
+set -u  # 使用未定义变量时脚本退出
+set -o pipefail  # 管道中任何命令失败时整个管道命令失败
+
+# 错误处理函数
+handle_error() {
+    echo "Error occurred at line $1"
+    exit 1
+}
+
+# 设置错误处理
+trap 'handle_error $LINENO' ERR
+
+# 自定义错误消息
+command_that_might_fail || { echo "Command failed"; exit 1; }
+```
+
+## 调试技巧
+
+```bash
+# 启用调试模式
+set -x  # 打印每条命令及其参数
+set -v  # 打印每条命令的输入
+
+# 仅调试部分代码
+set +x  # 关闭调试
+critical_code_here
+set -x  # 重新启用调试
+
+# 使用 bash -x 执行脚本
+# bash -x myscript.sh
+```
+
+## 实用示例
+
+### 批量重命名文件
+
+```bash
+#!/bin/bash
+# 将所有 .txt 文件重命名为 .bak
+for file in *.txt; do
+    mv "$file" "${file%.txt}.bak"
+done
+```
+
+### 系统监控脚本
+
+```bash
+#!/bin/bash
+# 简单的系统监控脚本
+
+while true; do
+    echo "===== 系统状态 $(date) ====="
+    echo "CPU 使用率:"
+    top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}'
+    
+    echo "内存使用率:"
+    free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2 }'
+    
+    echo "磁盘使用率:"
+    df -h | grep '^/dev/' | awk '{print $1 ": " $5}'
+    
+    echo "--------------------------"
+    sleep 5
+done
+```
+
+### 备份脚本
+
+```bash
+#!/bin/bash
+# 简单的备份脚本
+
+src_dir="/path/to/source"
+backup_dir="/path/to/backup"
+date_str=$(date +%Y%m%d_%H%M%S)
+backup_file="backup_$date_str.tar.gz"
+
+# 创建备份目录（如果不存在）
+mkdir -p "$backup_dir"
+
+# 创建备份
+echo "正在备份 $src_dir 到 $backup_dir/$backup_file..."
+tar -czf "$backup_dir/$backup_file" -C "$(dirname "$src_dir")" "$(basename "$src_dir")"
+
+# 验证备份是否成功
+if [ $? -eq 0 ]; then
+    echo "备份成功完成"
+    # 保留最近的5个备份，删除旧的
+    ls -t "$backup_dir"/backup_*.tar.gz | tail -n +6 | xargs -r rm
+    echo "已清理旧备份文件"
+else
+    echo "备份失败"
     exit 1
 fi
-
-NAME=$1
-CITY=$2
-
-echo "你好, $NAME!"
-echo "欢迎来到 $CITY."
 ```
 
-**运行**:
-```bash
-./greet_user.sh Bob London
-# 输出:
-# 你好, Bob!
-# 欢迎来到 London.
-```
+## 最佳实践
 
-## 读取用户输入 (`read`)
+1. **总是使用 shebang 行**：`#!/bin/bash`
+2. **添加注释**：解释复杂代码的功能和目的
+3. **使用有意义的变量名**：提高代码可读性
+4. **引用变量**：使用 `"$variable"` 而不是 `$variable`，防止变量包含空格时出错
+5. **使用退出状态**：脚本成功时返回0，失败时返回非0值
+6. **模块化代码**：将复杂逻辑拆分为函数
+7. **防止常见错误**：使用 `set -e`, `set -u` 和 `set -o pipefail`
+8. **安全删除**：使用 `rm -i` 或确认提示，防止意外删除
 
-`read` 命令用于在脚本运行时从用户那里获取输入，并将其存入一个变量。
+## 参考资源
 
-```bash
-#!/bin/bash
-
-echo "请输入你的名字:"
-read USER_NAME
-
-echo "你好, $USER_NAME! 很高兴认识你。"
-```
-
-## 控制流
-
-### `if-else` 语句
-用于根据条件执行不同的代码块。
-
-**基本结构**:
-```bash
-if [ condition ]; then
-    # 如果条件为真，执行这里的命令
-elif [ another_condition ]; then
-    # 如果条件为假，但这个条件为真，执行这里的命令
-else
-    # 如果以上条件都为假，执行这里的命令
-fi
-```
-- **注意**: `[` 和 `]` 与其中的条件之间必须有空格。
-
-**文件和字符串比较**:
-- `[ -f "$FILE" ]`: 如果文件存在且为普通文件，则为真。
-- `[ -d "$DIR" ]`: 如果目录存在，则为真。
-- `[ "$VAR1" == "$VAR2" ]`: 如果两个字符串相等，则为真。
-- `[ -z "$VAR" ]`: 如果变量为空，则为真。
-
-**数字比较**:
-- `-eq` (等于), `-ne` (不等于), `-gt` (大于), `-lt` (小于), `-ge` (大于等于), `-le` (小于等于)。
-
-```bash
-#!/bin/bash
-
-read -p "请输入你的年龄: " AGE
-
-if [ "$AGE" -lt 18 ]; then
-    echo "你还未成年。"
-else
-    echo "你已经是成年人了。"
-fi
-```
-
-### `for` 循环
-用于遍历一个列表。
-
-```bash
-#!/bin/bash
-
-# 遍历一个字符串列表
-for PLANET in Mercury Venus Earth Mars Jupiter
-do
-    echo "行星: $PLANET"
-done
-
-# C 语言风格的 for 循环
-for (( i=1; i<=5; i++ ))
-do
-    echo "计数: $i"
-done
-```
-
-### `while` 循环
-当给定条件为真时，重复执行代码块。
-
-```bash
-#!/bin/bash
-
-COUNTER=1
-while [ $COUNTER -le 5 ]
-do
-    echo "当前数字: $COUNTER"
-    # 使用 ((...)) 进行算术运算
-    ((COUNTER++))
-done
-```
-
-这是一个简单的起点。Shell 脚本可以变得非常复杂和强大，包括函数、数组、错误处理等高级特性，这些都可以在进阶学习中探索。 
+- [GNU Bash 手册](https://www.gnu.org/software/bash/manual/)
+- [Advanced Bash-Scripting Guide](https://tldp.org/LDP/abs/html/)
+- [Bash Hackers Wiki](https://wiki.bash-hackers.org/) 

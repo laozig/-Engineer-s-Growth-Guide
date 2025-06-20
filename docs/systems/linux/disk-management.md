@@ -1,148 +1,526 @@
-# 13. 磁盘与文件系统管理
+# Linux 磁盘管理
 
-管理存储是 Linux 系统管理的一项核心任务。这包括了解系统上有哪些磁盘、它们是如何被划分的、使用了什么文件系统，以及如何挂载它们以供访问。
+磁盘管理是系统管理的重要组成部分，涉及分区创建、文件系统格式化、挂载管理以及高级存储技术的应用。本文将介绍 Linux 中常用的磁盘管理工具和技术。
 
-## 查看磁盘和分区
+## 磁盘和分区基础
 
-### `lsblk` (List Block Devices)
-`lsblk` 命令以树状图的形式清晰地列出系统上所有的块设备（磁盘、分区、光驱等）。
+### 设备命名约定
+
+Linux 中的磁盘和分区遵循特定的命名约定：
+
+- **传统 SATA/IDE 硬盘**：`/dev/sdX`（X 是字母，如 a、b、c）
+  - 分区表示为 `/dev/sdXY`（Y 是数字，如 1、2、3）
+- **NVMe 固态硬盘**：`/dev/nvmeXnY`
+  - 例如：`/dev/nvme0n1p1`（第一个 NVMe 设备的第一个分区）
+- **虚拟磁盘**：`/dev/vdX`（常见于虚拟机环境）
+
+### 查看磁盘和分区信息
 
 ```bash
+# 列出所有磁盘和分区
+sudo fdisk -l
+
+# 使用 lsblk 查看块设备
 lsblk
 
-# 输出示例:
-# NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
-# sda           8:0    0    20G  0 disk
-# ├─sda1        8:1    0   512M  0 part /boot/efi
-# └─sda2        8:2    0  19.5G  0 part /
-# sdb           8:16   0    50G  0 disk
-# sr0          11:0    1  1024M  0 rom
-```
-- `sda`, `sdb`: 物理硬盘。
-- `sda1`, `sda2`: `sda` 硬盘上的分区。
-- `MOUNTPOINT`: 分区的挂载点。`sda2` 被挂载为根目录 `/`。
+# 查看分区的文件系统类型和使用情况
+df -Th
 
-## 检查磁盘空间使用情况
+# 查看特定磁盘的详细信息
+sudo smartctl -a /dev/sda
 
-### `df` (Disk Free)
-`df` 命令用于报告文件系统的总空间、已用空间、可用空间和挂载点。
-
-- 使用 `-h` (human-readable) 选项可以获得更易读的输出。
-
-```bash
-df -h
-
-# 输出示例:
-# Filesystem      Size  Used Avail Use% Mounted on
-# udev            987M     0  987M   0% /dev
-# tmpfs           200M  1.1M  199M   1% /run
-# /dev/sda2        19G  4.5G   14G  25% /
-# /dev/sda1       511M  4.0K  511M   1% /boot/efi
+# 查看磁盘使用情况
+du -sh /path/to/directory
 ```
 
-### `du` (Disk Usage)
-`du` 命令用于估算文件和目录占用的磁盘空间。
+## 分区管理
 
-- `du -sh <目录>` 是一个非常常用的组合：
-  - `-s` (summarize): 只显示总计大小。
-  - `-h` (human-readable): 以易读格式显示。
+### 分区表类型
+
+1. **MBR (Master Boot Record)**
+   - 传统分区表格式
+   - 最多支持4个主分区或3个主分区加1个扩展分区
+   - 单个分区最大支持2TB
+
+2. **GPT (GUID Partition Table)**
+   - 现代分区表格式，支持大容量磁盘
+   - 理论上支持无限数量的分区（实际受操作系统限制）
+   - 单个分区支持超过2TB
+
+### 使用 fdisk 进行分区管理
+
+`fdisk` 是一个交互式的分区工具，主要用于 MBR 分区表。
 
 ```bash
-# 查看 /var/log 目录的总大小
-du -sh /var/log
+# 启动 fdisk
+sudo fdisk /dev/sdb
 
-# 查看当前目录下每个子目录的大小
-du -h --max-depth=1
+# 常用命令（在 fdisk 交互式界面中）：
+# p - 打印分区表
+# n - 创建新分区
+# d - 删除分区
+# t - 更改分区类型
+# w - 写入更改并退出
+# q - 放弃更改并退出
 ```
 
-## Linux 文件系统简介
-文件系统是操作系统用来组织和管理磁盘上文件的一种结构。
-- **ext4**: 是许多 Linux 发行版默认的日志文件系统，非常成熟、稳定和可靠。
-- **XFS**: 一个高性能的日志文件系统，特别擅长处理大文件和大型文件系统。常用于 RHEL/CentOS。
-- **Btrfs (B-tree File System)**: 一个现代的写时复制 (Copy-on-Write) 文件系统，支持快照、校验和、内置 RAID 等高级功能。
+### 使用 parted 进行分区管理
 
-## 磁盘分区
-
-**警告**: 分区操作是危险的，可能会导致数据丢失。在对生产环境的磁盘进行操作前，请务必备份数据。
-
-分区是将一个物理磁盘划分为一个或多个逻辑区域的过程。
-- **MBR (Master Boot Record)**: 传统的分区方案。最多支持4个主分区，或3个主分区+1个扩展分区。磁盘最大容量限制为 2TB。
-- **GPT (GUID Partition Table)**: 现代的分区方案。默认支持多达128个分区，并且没有 2TB 的容量限制。是现代 UEFI 系统的标准。
-
-### `fdisk` 和 `gdisk`
-- **`fdisk`**: 用于 MBR 分区的经典工具。
-- **`gdisk`**: 专门用于 GPT 分区的工具，其操作界面与 `fdisk` 非常相似。
-
-**使用 `fdisk` 进行分区的基本流程 (以 `/dev/sdb` 为例)**:
-1.  启动 `fdisk`: `sudo fdisk /dev/sdb`
-2.  在 `fdisk` 提示符下：
-    - `p`: 打印当前分区表。
-    - `n`: 创建一个新分区。
-    - `d`: 删除一个分区。
-    - `t`: 更改分区的类型 ID。
-    - `w`: 将更改写入磁盘并退出。**在执行此操作前，所有更改都只在内存中。**
-    - `q`: 不保存更改并退出。
-
-## 创建文件系统
-
-分区完成后，你需要在新的分区上创建一个文件系统，这个过程称为"格式化"。
-
-### `mkfs` (Make Filesystem)
-`mkfs` 是一个前端命令，实际工作由特定文件系统的工具完成（如 `mkfs.ext4`, `mkfs.xfs`）。
+`parted` 支持 GPT 分区表，适用于大容量磁盘。
 
 ```bash
-# 在 /dev/sdb1 分区上创建一个 ext4 文件系统
+# 启动 parted
+sudo parted /dev/sdc
+
+# 常用命令（在 parted 交互式界面中）：
+# print - 显示分区表
+# mklabel gpt - 创建 GPT 分区表
+# mkpart - 创建新分区
+# rm - 删除分区
+# quit - 退出
+```
+
+### 使用 gdisk 进行 GPT 分区管理
+
+```bash
+# 安装 gdisk
+sudo apt install gdisk   # Debian/Ubuntu
+sudo yum install gdisk   # CentOS/RHEL
+
+# 使用 gdisk
+sudo gdisk /dev/sdc
+```
+
+## 文件系统管理
+
+### 常见文件系统类型
+
+- **ext4**：Linux 上最常用的文件系统，稳定可靠
+- **XFS**：高性能文件系统，特别适合大文件和大容量存储
+- **Btrfs**：现代文件系统，支持快照、RAID、压缩等高级功能
+- **F2FS**：为闪存设备优化的文件系统
+- **NTFS/FAT32**：Windows 文件系统，Linux 提供读写支持
+
+### 创建文件系统（格式化）
+
+```bash
+# 格式化为 ext4
 sudo mkfs.ext4 /dev/sdb1
 
-# 在 /dev/sdb2 分区上创建一个 xfs 文件系统
-sudo mkfs.xfs /dev/sdb2
+# 格式化为 XFS
+sudo mkfs.xfs /dev/sdc1
+
+# 格式化为 Btrfs
+sudo mkfs.btrfs /dev/sdd1
+
+# 格式化为 FAT32（用于跨平台兼容）
+sudo mkfs.vfat -F 32 /dev/sde1
+```
+
+### 检查和修复文件系统
+
+```bash
+# 检查 ext4 文件系统
+sudo fsck.ext4 /dev/sdb1
+
+# 检查 XFS 文件系统
+sudo xfs_repair /dev/sdc1
+
+# 强制检查已挂载的 ext4 文件系统（需要在下次重启时进行）
+sudo touch /forcefsck
 ```
 
 ## 挂载和卸载文件系统
 
-为了访问文件系统，你需要将其"挂载"到文件系统树中的一个目录上（称为挂载点）。
-
-### `mount` 和 `umount`
-- **`mount`**: 挂载文件系统。
-- **`umount`**: 卸载文件系统。
+### 临时挂载
 
 ```bash
-# 创建一个挂载点目录
-sudo mkdir /data
+# 挂载分区到指定目录
+sudo mount /dev/sdb1 /mnt/data
 
-# 将 /dev/sdb1 分区挂载到 /data 目录
-sudo mount /dev/sdb1 /data
+# 指定文件系统类型挂载
+sudo mount -t ext4 /dev/sdb1 /mnt/data
 
-# 查看 /data 目录的内容
-ls /data
+# 以只读方式挂载
+sudo mount -o ro /dev/sdb1 /mnt/data
 
-# 完成操作后，卸载文件系统
-sudo umount /data
+# 挂载 ISO 文件
+sudo mount -o loop ubuntu.iso /mnt/iso
 ```
 
-### 永久挂载: `/etc/fstab`
+### 卸载文件系统
 
-手动挂载是临时的，系统重启后会失效。要实现开机自动挂载，需要编辑 `/etc/fstab` (file systems table) 文件。
+```bash
+# 卸载文件系统
+sudo umount /mnt/data
 
-此文件的每一行代表一个要挂载的文件系统，格式如下：
-`<device> <mount_point> <filesystem_type> <options> <dump> <pass>`
+# 或者通过设备路径卸载
+sudo umount /dev/sdb1
 
-- **`<device>`**:
-  - 可以是设备名，如 `/dev/sdb1`。
-  - **推荐使用 `UUID`**。UUID 是分区的唯一标识符，不会因为磁盘顺序改变而变化。使用 `blkid /dev/sdb1` 命令可以获取 UUID。
-- **`<mount_point>`**: 挂载点目录，如 `/data`。
-- **`<filesystem_type>`**: 文件系统类型，如 `ext4`。
-- **`<options>`**: 挂载选项。`defaults` 通常是一个不错的起点，它包含了一组标准选项 (如 `rw`, `suid`, `dev`, `exec`, `auto`, `nouser`, `async`)。
-- **`<dump>`**: `dump` 工具使用的标志，通常设为 `0`。
-- **`<pass>`**: 文件系统检查 (`fsck`) 的顺序。根目录应为 `1`，其他文件系统为 `2`，`0` 表示不检查。
-
-**`/etc/fstab` 示例行**:
-```
-# 使用 UUID (推荐)
-UUID=1234abcd-56ef-7890-ghij-klmnopqrstuv /data ext4 defaults 0 2
-
-# 使用设备名
-/dev/sdb1 /data ext4 defaults 0 2
+# 强制卸载（当设备忙时）
+sudo umount -l /mnt/data
 ```
 
-编辑完 `/etc/fstab`后，可以运行 `sudo mount -a` 来挂载文件中所有尚未挂载的条目，这也可以用来测试你的配置是否正确。如果命令出错，说明你的 `fstab` 文件有语法问题，需要立即修复，否则系统可能无法正常启动。 
+### 永久挂载（/etc/fstab）
+
+编辑 `/etc/fstab` 文件以配置启动时自动挂载：
+
+```bash
+sudo nano /etc/fstab
+```
+
+`/etc/fstab` 条目格式：
+```
+<设备>  <挂载点>  <文件系统类型>  <挂载选项>  <dump>  <fsck顺序>
+```
+
+示例：
+```
+/dev/sdb1  /mnt/data  ext4  defaults  0  2
+UUID=1234-5678  /media/backup  xfs  defaults  0  2
+```
+
+使用 UUID 或 LABEL 替代设备路径更加稳定：
+```bash
+# 查找分区的 UUID
+sudo blkid
+
+# 使用 UUID 挂载
+UUID=1234-5678-90ab-cdef  /mnt/data  ext4  defaults  0  2
+
+# 设置文件系统标签
+sudo e2label /dev/sdb1 DATA
+
+# 使用标签挂载
+LABEL=DATA  /mnt/data  ext4  defaults  0  2
+```
+
+### 常用挂载选项
+
+- **defaults**：使用默认选项（rw, suid, dev, exec, auto, nouser, async）
+- **auto/noauto**：是否在启动时或使用 `mount -a` 时自动挂载
+- **exec/noexec**：允许/禁止执行文件
+- **ro/rw**：只读/读写模式
+- **user/nouser**：允许/禁止普通用户挂载
+- **sync/async**：同步/异步 I/O 操作
+- **noatime**：不更新文件访问时间，提高性能
+
+## 逻辑卷管理 (LVM)
+
+LVM（Logical Volume Manager）提供了更灵活的磁盘管理方式，允许调整分区大小、添加存储空间等操作而无需重新分区。
+
+### LVM 概念
+
+- **物理卷 (PV, Physical Volume)**：实际的磁盘分区或整个磁盘
+- **卷组 (VG, Volume Group)**：由一个或多个物理卷组成的存储池
+- **逻辑卷 (LV, Logical Volume)**：从卷组中分配的虚拟分区，可以格式化并挂载
+
+### 安装 LVM 工具
+
+```bash
+# Debian/Ubuntu
+sudo apt install lvm2
+
+# CentOS/RHEL
+sudo yum install lvm2
+```
+
+### 创建 LVM 系统
+
+1. 创建物理卷：
+```bash
+sudo pvcreate /dev/sdb1 /dev/sdc1
+```
+
+2. 创建卷组：
+```bash
+sudo vgcreate myvg /dev/sdb1 /dev/sdc1
+```
+
+3. 创建逻辑卷：
+```bash
+# 创建固定大小的逻辑卷
+sudo lvcreate -L 10G -n mylv myvg
+
+# 创建使用卷组所有可用空间的逻辑卷
+sudo lvcreate -l 100%FREE -n mylv myvg
+```
+
+4. 格式化和挂载逻辑卷：
+```bash
+sudo mkfs.ext4 /dev/myvg/mylv
+sudo mkdir /mnt/lvm
+sudo mount /dev/myvg/mylv /mnt/lvm
+```
+
+### LVM 管理命令
+
+```bash
+# 显示物理卷信息
+sudo pvs
+sudo pvdisplay
+
+# 显示卷组信息
+sudo vgs
+sudo vgdisplay
+
+# 显示逻辑卷信息
+sudo lvs
+sudo lvdisplay
+```
+
+### 扩展和缩减 LVM
+
+```bash
+# 扩展卷组（添加新的物理卷）
+sudo pvcreate /dev/sdd1
+sudo vgextend myvg /dev/sdd1
+
+# 扩展逻辑卷
+sudo lvextend -L +5G /dev/myvg/mylv
+sudo resize2fs /dev/myvg/mylv  # 对于 ext4 文件系统
+
+# 对于 XFS 文件系统
+sudo lvextend -L +5G /dev/myvg/mylv
+sudo xfs_growfs /mnt/lvm
+
+# 缩减逻辑卷（先卸载并检查文件系统）
+sudo umount /mnt/lvm
+sudo fsck -f /dev/myvg/mylv
+sudo resize2fs /dev/myvg/mylv 5G
+sudo lvreduce -L 5G /dev/myvg/mylv
+```
+
+## RAID 配置
+
+RAID（Redundant Array of Independent Disks）提供数据冗余和/或性能提升。
+
+### 软件 RAID 创建（mdadm）
+
+```bash
+# 安装 mdadm
+sudo apt install mdadm  # Debian/Ubuntu
+sudo yum install mdadm  # CentOS/RHEL
+
+# 创建 RAID 1（镜像）
+sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+
+# 创建 RAID 5（奇偶校验）
+sudo mdadm --create /dev/md0 --level=5 --raid-devices=3 /dev/sdb1 /dev/sdc1 /dev/sdd1
+
+# 创建 RAID 0（条带化，无冗余）
+sudo mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sdb1 /dev/sdc1
+```
+
+### RAID 管理
+
+```bash
+# 查看 RAID 状态
+cat /proc/mdstat
+sudo mdadm --detail /dev/md0
+
+# 保存 RAID 配置
+sudo mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+
+# 停止 RAID 阵列
+sudo mdadm --stop /dev/md0
+
+# 添加备用磁盘
+sudo mdadm --add /dev/md0 /dev/sde1
+```
+
+## 磁盘加密
+
+### 使用 LUKS 加密分区
+
+```bash
+# 安装 cryptsetup
+sudo apt install cryptsetup  # Debian/Ubuntu
+sudo yum install cryptsetup  # CentOS/RHEL
+
+# 初始化加密分区
+sudo cryptsetup luksFormat /dev/sdb1
+
+# 打开加密分区（会提示输入密码）
+sudo cryptsetup luksOpen /dev/sdb1 encrypted_data
+
+# 格式化已解锁的设备
+sudo mkfs.ext4 /dev/mapper/encrypted_data
+
+# 挂载
+sudo mount /dev/mapper/encrypted_data /mnt/secure
+
+# 卸载和关闭
+sudo umount /mnt/secure
+sudo cryptsetup luksClose encrypted_data
+```
+
+### 配置自动挂载加密分区
+
+编辑 `/etc/crypttab`：
+```
+encrypted_data UUID=<uuid-of-encrypted-device> none luks
+```
+
+然后在 `/etc/fstab` 中添加：
+```
+/dev/mapper/encrypted_data  /mnt/secure  ext4  defaults  0  2
+```
+
+## 磁盘配额
+
+磁盘配额限制用户或组可以使用的磁盘空间。
+
+### 安装配额工具
+
+```bash
+# Debian/Ubuntu
+sudo apt install quota
+
+# CentOS/RHEL
+sudo yum install quota
+```
+
+### 配置配额
+
+1. 修改 `/etc/fstab` 添加配额选项：
+```
+/dev/sdb1  /home  ext4  defaults,usrquota,grpquota  0  2
+```
+
+2. 重新挂载文件系统：
+```bash
+sudo mount -o remount /home
+```
+
+3. 初始化配额数据库：
+```bash
+sudo quotacheck -cugm /home
+```
+
+4. 启用配额：
+```bash
+sudo quotaon /home
+```
+
+5. 设置用户配额：
+```bash
+sudo edquota -u username
+```
+
+6. 查看配额使用情况：
+```bash
+sudo quota -u username
+sudo repquota -a
+```
+
+## 磁盘性能和监控
+
+### 监控工具
+
+```bash
+# I/O 统计
+iostat -x 2
+
+# 实时 I/O 监控
+iotop
+
+# 显示文件系统和挂载点的 I/O 统计
+sudo iotop
+
+# 磁盘使用情况
+df -h
+
+# 目录大小
+du -sh /path/to/directory
+
+# 查找大文件
+find / -type f -size +100M -exec ls -lh {} \; | sort -k5 -rh
+```
+
+### 优化磁盘性能
+
+```bash
+# 启用 noatime 挂载选项
+/dev/sda1  /  ext4  defaults,noatime  0  1
+
+# 使用 fstrim 对 SSD 进行 TRIM 操作
+sudo fstrim -av
+
+# 设置 I/O 调度器
+echo deadline > /sys/block/sda/queue/scheduler
+
+# 预读取文件系统缓存
+sudo blockdev --setra 4096 /dev/sda
+```
+
+## 备份和恢复
+
+### 使用 dd 创建整个磁盘或分区的镜像
+
+```bash
+# 备份整个磁盘
+sudo dd if=/dev/sda of=/path/to/disk.img bs=4M status=progress
+
+# 备份分区
+sudo dd if=/dev/sda1 of=/path/to/partition.img bs=4M status=progress
+
+# 恢复镜像
+sudo dd if=/path/to/disk.img of=/dev/sda bs=4M status=progress
+```
+
+### 使用 rsync 备份数据
+
+```bash
+# 本地备份
+rsync -avhP /source/directory/ /backup/directory/
+
+# 远程备份
+rsync -avhP -e ssh /source/directory/ user@remote:/backup/directory/
+```
+
+## 常见问题排查
+
+### 文件系统问题
+
+```bash
+# 检查日志
+dmesg | grep -i error
+dmesg | grep -i sda
+
+# 检查 S.M.A.R.T 数据
+sudo smartctl -a /dev/sda
+
+# 运行长时间 S.M.A.R.T 测试
+sudo smartctl -t long /dev/sda
+
+# 查看测试结果
+sudo smartctl -l selftest /dev/sda
+
+# 检查坏块
+sudo badblocks -v /dev/sda
+```
+
+### 空间不足问题
+
+```bash
+# 查找大文件
+find / -type f -size +100M -exec ls -lh {} \; | sort -k5 -rh | head -20
+
+# 查找大目录
+du -h --max-depth=2 / | sort -hr | head -20
+
+# 清理日志文件
+sudo journalctl --vacuum-time=2d
+
+# 清理软件包缓存
+sudo apt clean  # Debian/Ubuntu
+sudo dnf clean all  # CentOS/RHEL/Fedora
+```
+
+## 参考资源
+
+- [Linux 文件系统层次结构标准](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html)
+- [LVM 管理指南](https://www.centos.org/docs/5/html/Cluster_Logical_Volume_Manager/index.html)
+- [RAID Wiki](https://raid.wiki.kernel.org/index.php/Linux_Raid)
+- [Linux 文件系统性能优化](https://www.kernel.org/doc/Documentation/filesystems/) 

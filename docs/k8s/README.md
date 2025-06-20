@@ -41,13 +41,13 @@
 
 ### 📦 Part 6: 可观测性与包管理 (Observability & Package Management)
 
-- [√] 17. [可观测性：日志与监控](observability.md)
-- [√] 18. [Helm：Kubernetes 包管理器](helm.md)
+- [✓] 17. [应用可观测性 (Observability)](observability.md)
+- [✓] 18. [Helm：Kubernetes 包管理器](helm.md)
 
 ### 🏗️ Part 7: 实战案例 (Case Study)
 
-- [√] 19. [案例研究：部署一个三层 Web 应用](case-study-three-tier-app.md)
+- [✓] 19. [案例研究：部署一个三层 Web 应用](case-study-three-tier-app.md)
 
 ---
 
-恭喜你完成了 Kubernetes 学习指南！希望这些内容能帮助你掌握 Kubernetes，并在实际工作中得心应手。
+祝您学习愉快！ 

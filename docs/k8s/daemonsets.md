@@ -1,117 +1,107 @@
 # 15. DaemonSets：在每个节点运行 Pod
 
-在 Kubernetes 中，我们通常不关心 Pod 具体运行在哪个节点上，这是由调度器决定的。但某些特定的场景下，我们恰恰需要**在集群的每一个（或指定的某一些）节点上都运行且只运行一个 Pod 副本**。
+在某些场景下，我们希望确保集群中的**每个（或某些）节点**上都运行且只运行一个特定的 Pod 副本。例如：
+- **日志收集**: 在每个节点上运行一个如 Fluentd 或 Logstash 的日志收集代理。
+- **节点监控**: 在每个节点上运行一个如 Prometheus Node Exporter 或 Datadog Agent 的监控代理。
+- **网络插件**: 某些 CNI 网络插件（如 Calico, Cilium）需要在每个节点上运行一个代理 Pod。
+- **节点存储**: 如 GlusterFS 或 Ceph 等存储守护进程需要在每个节点上运行。
 
-这些典型的"节点级"应用包括：
--   **日志收集器**: 如 Fluentd, Logstash, Filebeat，它们需要从每个节点收集容器日志。
--   **节点监控代理**: 如 Prometheus Node Exporter, Datadog Agent，它们需要采集每个节点的性能指标（CPU, 内存, 网络）。
--   **网络和存储插件**: 很多 CNI 插件（如 Calico, Flannel）和存储插件都需要在每个节点上运行一个代理进程来管理网络路由或存储卷。
+对于这类需求，使用 `Deployment` 是不合适的，因为它无法保证 Pod 在节点间的均匀分布。Kubernetes 为此提供了专门的控制器：**DaemonSet**。
 
-对于这种"一个节点一个副本"的需求，`Deployment` 或 `StatefulSet` 都不适用。为此，Kubernetes 提供了 `DaemonSet`。
+## 15.1 什么是 DaemonSet？
 
-## 什么是 DaemonSet？
+**DaemonSet** 是一个 Kubernetes 工作负载对象，它能确保所有（或一部分）符合条件的节点上都运行一个指定的 Pod 副本。
 
-`DaemonSet` 是一种工作负载资源，它确保**所有（或一部分）符合条件的节点上都运行一个指定的 Pod 副本**。
+**核心特性**：
+- **节点覆盖**：当有新的节点加入集群时，DaemonSet 会自动在该节点上创建一个新的 Pod。当节点被移除时，对应的 Pod 会被垃圾回收。
+- **节点选择**：可以通过 `nodeSelector` 或 `affinity` 来指定 DaemonSet 只在特定的节点子集上运行 Pod（例如，只在带有 SSD 硬盘的节点上运行存储守护进程）。
+- **一一对应**：DaemonSet 保证每个符合条件的节点上**最多只有一个**它所管理的 Pod。
 
-`DaemonSet` 控制器的工作逻辑很简单：
--   它会持续监控集群中的节点列表。
--   当一个**新的节点加入**集群并且符合 `DaemonSet` 的调度要求时，`DaemonSet` 会自动在该节点上创建一个 Pod。
--   当一个**节点从集群中被移除**时，`DaemonSet` 会自动清理掉该节点上的对应 Pod。
--   当一个 `DaemonSet` 被删除时，它创建的所有 Pod 也会被一并删除。
+可以把 DaemonSet 理解为节点的"守护进程"管理器。
 
-你可以把它看作是 Kubernetes 里的"守护进程"管理器。
+## 15.2 DaemonSet vs. Deployment
 
-## DaemonSet 的 YAML 定义
+| 特性 | Deployment | DaemonSet |
+| :--- | :--- | :--- |
+| **副本控制** | `replicas` 字段控制 Pod 总数 | 无 `replicas` 字段，副本数由符合条件的节点数决定 |
+| **调度目标** | 将 Pod 调度到**任何可用**的节点 | 将 Pod 调度到**每个符合条件**的节点 |
+| **主要用途** | 部署无状态或有状态应用 | 部署节点级别的代理或守护进程 |
 
-`DaemonSet` 的 YAML 结构与 `Deployment` 非常相似，主要的区别在于它**没有 `replicas` 字段**。因为它的副本数是由符合条件的节点数量动态决定的。
+## 15.3 如何定义一个 DaemonSet (YAML)
+
+DaemonSet 的 YAML 定义与 Deployment 非常相似，主要区别在于**没有 `replicas` 字段**。
+
+下面是一个部署 Fluentd 日志收集代理的 DaemonSet 示例。
 
 `fluentd-daemonset.yaml`:
 ```yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluentd-log-collector
-  namespace: kube-system # 系统级插件通常放在 kube-system 命名空间
+  name: fluentd-logging
   labels:
-    k8s-app: fluentd-logging
+    app: fluentd
 spec:
+  # 1. 选择器，用于关联 Pod
   selector:
     matchLabels:
       name: fluentd-es
+  # 2. Pod 模板
   template:
     metadata:
       labels:
         name: fluentd-es
     spec:
-      tolerations: # 1. 容忍节点的 "污点"
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
+      # 容忍所有污点，确保能在 master 节点上也运行
+      tolerations:
+      - key: node-role.kubernetes.io/master
         effect: NoSchedule
       containers:
-      - name: fluentd
-        image: fluent/fluentd-kubernetes-daemonset:v1
-        resources:
-          limits:
-            memory: 200Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
+      - name: fluentd-es
+        image: fluent/fluentd-kubernetes-daemonset:v1.4.2-debian-elasticsearch-1.1
+        # 挂载宿主机的 /var/log 目录来收集日志
         volumeMounts:
         - name: varlog
           mountPath: /var/log
+        # 挂载宿主机的容器日志目录
         - name: varlibdockercontainers
           mountPath: /var/lib/docker/containers
           readOnly: true
+      # 终止 Pod 前的宽限期
+      terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
-        hostPath: # DaemonSet 经常与 hostPath 配合使用
+        hostPath:
           path: /var/log
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
 ```
 
-### 在特定节点上运行 DaemonSet
+**分析**：
+- 这个 DaemonSet 会在集群的**每一个节点**（包括 Master 节点，因为我们添加了相应的 `tolerations`）上都部署一个 Fluentd Pod。
+- 每个 Pod 都会使用 `hostPath` 卷来挂载该节点上的 `/var/log` 和 `/var/lib/docker/containers` 目录，从而能访问到该节点上所有容器的日志文件。
 
-默认情况下，`DaemonSet` 会在集群的**所有**节点上创建 Pod。但你可以通过标准的节点亲和性/选择性机制来限制它运行的范围。
+## 15.4 更新 DaemonSet
 
--   **`spec.template.spec.nodeSelector`**:
-    只在拥有特定标签的节点上运行。
-    ```yaml
-    # ...
-    spec:
-      template:
-        spec:
-          nodeSelector:
-            disktype: ssd # 只在带有 "disktype=ssd" 标签的节点上运行
-          # ...
-    ```
--   **`spec.template.spec.affinity`**:
-    使用更复杂的节点亲和性规则。
--   **`spec.template.spec.tolerations`**:
-    如上面的例子所示，`DaemonSet` 通常需要添加对主节点"污点 (Taints)"的"容忍 (Tolerations)"，以确保它们也能在主节点上运行。
+DaemonSet 支持与 Deployment 类似的滚动更新策略。
 
-## DaemonSet 的更新策略
+**`spec.updateStrategy`**:
+- **`RollingUpdate`** (默认): 当你更新 Pod 模板时，DaemonSet 会逐个节点地删除旧的 Pod 并创建新的 Pod。你可以通过 `maxUnavailable` (默认为1) 来控制同一时间最多有多少个 Pod 可以处于不可用状态。
+- **`OnDelete`**: 更新 Pod 模板后，只有当你手动删除旧的 Pod 时，DaemonSet 才会创建新的 Pod。这种方式提供了更手动的控制。
 
-`DaemonSet` 支持两种更新策略，通过 `spec.updateStrategy.type` 字段指定：
+**示例**：
+```yaml
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # 在更新期间，最多允许一个 Pod 不可用
+      maxUnavailable: 1
+```
 
-1.  **`RollingUpdate` (默认)**:
-    -   这是推荐的策略，与 `Deployment` 的滚动更新类似。
-    -   当你更新 `DaemonSet` 的模板时，它会逐个节点地删除旧的 Pod 并创建新的 Pod。
-    -   你可以通过 `spec.updateStrategy.rollingUpdate.maxUnavailable` (默认为 1) 来控制在更新过程中同时可以有多少个 Pod 不可用。
+## 15.5 总结
 
-2.  **`OnDelete`**:
-    -   使用此策略时，更新 `DaemonSet` 模板不会自动触发任何变更。
-    -   只有当你**手动删除**一个旧的 `DaemonSet` Pod 后，控制器才会用新的模板创建一个新的 Pod 来替代它。
-    -   这种策略为你提供了手动控制更新过程的能力，适用于需要精细操作的场景。
+DaemonSet 是 Kubernetes 中用于部署节点级代理和守护进程的关键工具。它通过确保在每个符合条件的节点上都运行一个 Pod 实例，简化了集群范围内的日志收集、监控和网络管理等任务的部署。
 
-## DaemonSet vs. Deployment
-
-| 特性 | DaemonSet | Deployment |
-| :--- | :--- | :--- |
-| **核心目标** | **节点覆盖率**：确保每个节点上都有一个副本 | **总副本数**：确保集群中有指定数量的副本 |
-| **副本数** | 由符合条件的节点数决定 | 由 `replicas` 字段明确指定 |
-| **调度** | 忽略节点的不可调度状态 (`unschedulable`) | 尊重节点的不可调度状态 |
-| **适用场景** | 节点级的代理、监控、日志收集 | 无状态的应用服务（Web, API）|
-
-`DaemonSet` 是构建健壮的、可观测的 Kubernetes 集群不可或缺的一部分。通过它，我们可以轻松地将基础服务部署到集群的每一个角落。 
+与 Deployment 和 StatefulSet 一样，DaemonSet 也是 Kubernetes 提供的核心工作负载之一。在下一章，我们将学习最后一种工作负载类型：**Job** 和 **CronJob**，用于处理批处理和定时任务。

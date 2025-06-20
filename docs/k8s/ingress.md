@@ -1,150 +1,116 @@
 # 12. Ingress：集群流量入口
 
-我们已经知道如何使用 `Service` 的 `NodePort` 或 `LoadBalancer` 类型来将应用暴露给外部世界。但这两种方式有明显的缺点：
+我们已经学习了如何使用 `Service` (如 `NodePort` 或 `LoadBalancer`) 来暴露应用。但这些方式存在一些问题：
+- `NodePort`：占用每个节点的端口，且端口范围有限，不适合大规模使用。
+- `LoadBalancer`：每暴露一个服务就需要一个云服务商的负载均衡器，成本高昂。
 
--   `NodePort`: 每个服务都需要在所有节点上占用一个端口，管理混乱且不适合大规模应用。
--   `LoadBalancer`: **每暴露一个服务就需要一个云服务商提供的负载均衡器**。这非常昂贵，而且每个负载均衡器都需要一个公网 IP，这在 IPv4 地址日益枯竭的今天是一种巨大的浪费。
+对于需要暴露多个 HTTP/HTTPS 服务的场景，Kubernetes 提供了更强大、更灵活的解决方案：**Ingress**。
 
-想象一下，如果你有几十个微服务需要对外暴露，难道要创建几十个 `LoadBalancer` 吗？显然不现实。
+## 12.1 什么是 Ingress？
 
-为了解决这个问题，Kubernetes 引入了 `Ingress`。
+**Ingress** 是对集群中 Service 的**七层（HTTP/HTTPS）负载均衡**和**流量路由**规则的集合。它本身不是一个 Service，而是一个 API 对象，用于定义外部流量如何到达集群内部的 Service。
 
-## 什么是 Ingress？
+你可以将 Ingress 想象成集群的"交通警察"或"API 网关"。它能检查传入的 HTTP 请求，并根据**主机名（Host）**和**路径（Path）**来决定将流量转发到哪个 Service。
 
-`Ingress` 是一个 Kubernetes API 对象，它为集群内的 `Service` 集合提供了一个**统一的、智能的七层 (HTTP/S) 路由入口**。
+**核心功能**：
+- **基于主机名的路由**：将 `foo.example.com` 的流量导向 `foo-service`，将 `bar.example.com` 的流量导向 `bar-service`。
+- **基于路径的路由**：将 `example.com/api` 的流量导向 `api-service`，将 `example.com/ui` 的流量导向 `ui-service`。
+- **SSL/TLS 终止**：集中管理 TLS 证书，为你的服务提供 HTTPS 加密，而无需在每个 Service 中单独配置。
+- **将多个 Service 聚合到单个 IP 地址**：所有流量都通过 Ingress 的入口 IP 进入，有效节省了 `LoadBalancer` 的使用和成本。
 
-你可以把 `Ingress` 想象成一个集群的"流量总管"或"API 网关"。它允许你用一套统一的规则来定义：
--   如何将外部请求**基于主机名 (Host)** 路由到不同的服务。
--   如何将外部请求**基于路径 (Path)** 路由到不同的服务。
--   如何管理和终止 **TLS (HTTPS)** 连接。
+## 12.2 Ingress Controller：真正的工作者
 
-通过 `Ingress`，你可以使用**一个公网 IP 和一个负载均衡器**，来为集群内**所有**的服务提供外部访问。
+值得注意的是，创建 Ingress 对象本身**并不会生效**。你必须在集群中运行一个 **Ingress Controller**。
 
-![Ingress-Architecture](https://i.imgur.com/your-ingress-arch-image.png) <!-- 你需要替换成真实的图片链接 -->
+- **Ingress Controller** 是一个实际的 Pod 或一组 Pod，它负责监听 Ingress 资源的变化，并根据其中定义的规则来配置底层的负载均衡器（通常是一个反向代理，如 Nginx, HAProxy, 或 Traefik）。
 
-## Ingress vs. Ingress Controller
+**工作流程**：
+1.  外部流量到达 Ingress Controller 的入口点（通常是一个 `LoadBalancer` 类型的 Service）。
+2.  Ingress Controller 查看请求的 HTTP Host 和 Path。
+3.  它在已创建的 Ingress 资源中查找匹配的路由规则。
+4.  根据规则，它将流量转发到后端对应的 Service，再由 Service 转发到最终的 Pod。
 
-理解 `Ingress` 的关键在于区分两个概念：
+常见的 Ingress Controller 实现包括：
+- **Kubernetes NGINX Ingress Controller**: 由 Kubernetes 社区维护，使用 Nginx 作为反向代理。
+- **Traefik**: 一个现代的、云原生的反向代理和负载均衡器。
+- **Contour**: 由 Heptio (现为 VMware) 开源的 Ingress Controller。
+- 各大云厂商也提供其自家的 Ingress Controller 实现。
 
-1.  **`Ingress` 对象**: 这是一个 Kubernetes 资源，你在 YAML 文件中定义的是它。它本身**不做任何事情**，它只是一套**路由规则**的集合。
-2.  **`Ingress Controller` (Ingress 控制器)**: 这是一个**真正工作的程序**，它通常是一个运行在集群中的反向代理服务器（如 NGINX, Traefik, HAProxy）。`Ingress Controller` 持续地监听 (watch) 集群中 `Ingress` 对象的变化，并根据这些规则来动态地配置自己，将外部流量正确地转发到后端服务。
+<div align="center">
+  <img src="https://i.imgur.com/gK9wJ1b.png" alt="Ingress workflow" width="700">
+</div>
 
-**这个关系至关重要**：在你的集群中，**必须先部署一个 `Ingress Controller`**，然后创建的 `Ingress` 规则才会生效。常见的 Ingress Controller 包括 [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/), [Traefik](https://traefik.io/traefik/), [Contour](https://projectcontour.io/) 等。
+## 12.3 如何定义一个 Ingress (YAML)
 
-## Ingress 的 YAML 定义
+下面是一个 Ingress 资源的示例，它定义了基于主机名和路径的路由规则。
 
-`Ingress` 的强大之处在于其灵活的路由规则。
-
-### 1. 基于路径的路由 (Path-based Routing)
-
-你可以根据请求的 URL 路径将流量分发到不同的服务。
-
-`single-host-ingress.yaml`:
+`my-ingress.yaml`:
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: simple-fanout-example
+  name: my-app-ingress
+  annotations:
+    # Ingress Controller 特定的注解，用于额外配置
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  # Ingress 类，指定由哪个 Ingress Controller 处理
+  ingressClassName: nginx-example
+  # 定义 TLS 配置
+  tls:
+  - hosts:
+    - my-app.example.com
+    # 引用包含证书和私钥的 Secret
+    secretName: my-tls-secret
+  # 定义路由规则
   rules:
   - host: my-app.example.com
     http:
       paths:
-      - path: /api
+      # 将 /analytics 路径的流量转发到 analytics-service 的 80 端口
+      - path: /analytics
         pathType: Prefix
         backend:
           service:
-            name: api-service # /api 的请求转发到这里
+            name: analytics-service
+            port:
+              number: 80
+      # 将 /shopping 路径的流量转发到 shopping-service 的 8080 端口
+      - path: /shopping
+        pathType: Prefix
+        backend:
+          service:
+            name: shopping-service
             port:
               number: 8080
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend-service # 其他所有请求转发到这里
-            port:
-              number: 80
 ```
--   `host`: 指定该规则适用的主机名。
--   `paths`: 一个路径规则列表。
--   `path`: URL 路径。
--   `pathType`: 路径匹配类型，`Prefix` 表示前缀匹配，`Exact` 表示精确匹配。
--   `backend`: 定义了流量应该被转发到的后端 `Service`。
 
-### 2. 基于名称的虚拟主机 (Name-based Virtual Hosting)
+**关键字段解释**:
+- `metadata.annotations`: 用于提供 Ingress Controller 特定的配置，每个 Controller 的注解都不同。
+- `spec.ingressClassName`: 在有多个 Ingress Controller 的集群中，明确指定由哪一个来处理此 Ingress 资源。
+- `spec.tls`: 定义 TLS 配置。`hosts` 列表中的域名将使用 `secretName` 引用的 Secret 中的证书进行加密。
+- `spec.rules`: 路由规则的核心。
+  - `host`: 匹配的请求主机名。
+  - `http.paths`: 该主机下的路径规则列表。
+    - `path`: 匹配的 URL 路径。
+    - `pathType`: 路径匹配类型，`Prefix` (前缀匹配) 或 `Exact` (精确匹配)。
+    - `backend.service`: 定义了流量要转发到的目标 Service 和端口。
 
-你可以根据请求的主机名将流量分发到不同的服务，就像配置 NGINX 的 `server_name` 一样。
+## 12.4 默认后端 (Default Backend)
 
-`multi-host-ingress.yaml`:
+你还可以定义一个默认后端。如果没有任何规则匹配传入的请求，流量将被发送到这个默认的 Service。这对于处理 404 页面或提供一个默认的"欢迎"页面非常有用。
+
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: name-virtual-host-ingress
 spec:
-  rules:
-  - host: foo.example.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: foo-service # foo.example.com 的请求转发到 foo-service
-            port:
-              number: 80
-  - host: bar.example.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: bar-service # bar.example.com 的请求转发到 bar-service
-            port:
-              number: 80
+  defaultBackend:
+    service:
+      name: default-404-service
+      port:
+        number: 80
 ```
 
-### 3. TLS (HTTPS) 终止
+## 12.5 总结
 
-`Ingress` 可以为你处理 HTTPS 流量的解密，这个过程称为 TLS 终止。你的应用本身只需要处理普通的 HTTP 流量即可。
+Ingress 是 Kubernetes 中管理 HTTP/HTTPS 流量路由的强大工具。通过结合 Ingress Controller，它提供了一种集中、高效且经济的方式来将集群内部的多个服务暴露给外部世界。理解如何配置基于主机和路径的路由，以及如何使用 TLS 终止，是构建生产级 Web 应用的关键技能。
 
-`tls-ingress.yaml`:
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: tls-example-ingress
-spec:
-  tls:
-  - hosts:
-    - https-app.example.com
-    secretName: my-tls-secret # 引用包含 TLS 证书和私钥的 Secret
-  rules:
-  - host: https-app.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: my-secure-app-service
-            port:
-              number: 80
-```
--   `tls`: 定义了 TLS 配置。
--   `hosts`: 该证书适用的主机名列表。
--   `secretName`: 引用一个类型为 `kubernetes.io/tls` 的 `Secret`。这个 `Secret` 必须包含 `tls.crt` (证书) 和 `tls.key` (私钥) 两个键。
-
-## 总结：Ingress 工作流程
-
-1.  用户在浏览器中输入 `https://foo.example.com/api`。
-2.  DNS 将 `foo.example.com` 解析到你的 **Ingress Controller** 的公网 IP 地址。
-3.  流量到达 `Ingress Controller`（它通常是一个 `LoadBalancer` 类型的服务）。
-4.  `Ingress Controller` 检查请求：主机头是 `foo.example.com`，路径是 `/api`。
-5.  `Ingress Controller` 在其内存中的配置里查找匹配的 `Ingress` 规则。
-6.  它找到了一个规则，指示应将此请求转发到 `api-service` 的 8080 端口。
-7.  `Ingress Controller` 将请求转发给 `api-service`。
-8.  `api-service` 再将请求负载均衡到其后端的某个 `Pod`。
-
-`Ingress` 是 Kubernetes 中管理应用入口流量的强大工具，它通过统一的路由规则和对 TLS 的原生支持，极大地简化了在生产环境中发布和管理大规模微服务的复杂性。 
+在下一章，我们将探讨 Kubernetes 网络安全的另一个重要方面：**NetworkPolicy**，学习如何在 Pod 之间创建防火墙规则。

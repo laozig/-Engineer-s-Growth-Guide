@@ -1,139 +1,222 @@
-# 16. 容器化 (Docker, Podman)
+# 容器化技术
 
-容器化是一种轻量级的虚拟化技术，它允许你将应用程序及其所有依赖（库、配置文件、运行时等）打包到一个标准化的、可移植的单元中，即**容器**。这个容器可以在任何支持容器化的 Linux 系统上运行，表现完全一致。
+## 容器技术简介
 
-## 容器 vs. 虚拟机 (VM)
+容器是一种轻量级的虚拟化技术，它将应用程序及其依赖打包在一个独立的单元中。与传统虚拟机不同，容器共享主机的操作系统内核，因此启动更快、资源消耗更少。
 
-理解容器与传统虚拟机的区别至关重要：
+### 容器 vs 虚拟机
 
-- **虚拟机 (Virtual Machine)**:
-  - 在物理硬件（Host OS）之上运行一个完整的客户操作系统（Guest OS），包括其自身的内核。
-  - 每个 VM 都需要GB级别的存储空间和内存。
-  - 启动慢，资源开销大。
-  - 提供了完全的隔离。
+| 特性 | 容器 | 虚拟机 |
+|------|------|--------|
+| 隔离级别 | 进程级隔离 | 完全隔离 |
+| 资源开销 | 轻量级 | 较重 |
+| 启动时间 | 秒级 | 分钟级 |
+| 存储空间 | MB 级别 | GB 级别 |
+| 操作系统 | 共享宿主 OS 内核 | 包含完整 OS |
 
-- **容器 (Container)**:
-  - **共享宿主机的内核**。容器内只包含应用程序及其依赖，不包含操作系统内核。
-  - 容器是轻量级的，通常只有MB级别。
-  - 启动速度极快，接近原生应用。
-  - 资源占用少，可以在一台机器上运行数百个容器。
-  - 隔离性不如 VM，但对于大多数应用来说已经足够。
+### 容器技术的优势
 
-![Container vs VM](https://i.imgur.com/your-container-vm-image.png) <!-- 你需要替换成真实的图片链接 -->
+- **一致的环境**：从开发到测试到生产，保持一致的运行环境
+- **快速部署**：容器可以在几秒内启动
+- **高效利用资源**：多个容器共享操作系统资源
+- **隔离性**：容器之间相互隔离，不会相互影响
+- **可移植性**：可以在任何支持容器技术的平台上运行
 
-## 1. Docker
+## Docker
 
-Docker 是目前最流行和使用最广泛的容器化平台。它极大地简化了容器的创建、管理和分发。
+Docker 是目前最流行的容器平台，它简化了容器的创建、部署和运行过程。
 
-### Docker 核心概念
-- **镜像 (Image)**: 一个只读的模板，包含了创建容器所需的一切：代码、运行时、库、环境变量和配置文件。镜像是分层构建的。
-- **容器 (Container)**: 镜像的一个可运行实例。你可以从同一个镜像创建任意多个容器。容器是可写的，你在容器内做的任何修改都只存在于该容器中。
-- **Dockerfile**: 一个纯文本文件，定义了如何一步步构建一个 Docker 镜像。这是实现"基础设施即代码"的关键。
-- **仓库 (Registry)**: 存储和分发 Docker 镜像的地方。Docker Hub 是官方的公共仓库。
+### 核心概念
 
-### 安装 Docker (以 Ubuntu 为例)
+- **镜像 (Image)**：容器的只读模板，包含运行容器所需的所有文件和配置
+- **容器 (Container)**：镜像的运行实例，可以被启动、停止、删除
+- **仓库 (Repository)**：存储和分发 Docker 镜像的地方，如 Docker Hub
+
+### 安装 Docker
+
 ```bash
-# 卸载旧版本
-sudo apt-get remove docker docker-engine docker.io containerd runc
+# Ubuntu
+sudo apt update
+sudo apt install docker.io
+sudo systemctl enable --now docker
 
-# 设置 Docker 的 apt 仓库
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# 安装 Docker Engine
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# 将当前用户添加到 docker 组以避免每次都输入 sudo (需要重新登录后生效)
-sudo usermod -aG docker $USER
+# CentOS
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install docker-ce docker-ce-cli containerd.io
+sudo systemctl start docker
+sudo systemctl enable docker
 ```
 
-### 常用 Docker 命令
-- **`docker run`**: 从镜像创建并启动一个新容器。
-  ```bash
-  # 运行一个 nginx 容器，将容器的80端口映射到宿主机的8080端口，并在后台运行
-  docker run --name my-nginx -d -p 8080:80 nginx
+### 基本命令
 
-  # 运行一个 ubuntu 容器，并进入其交互式 shell
-  docker run -it ubuntu /bin/bash
-  ```
-- **`docker ps`**: 列出正在运行的容器。
-  - `docker ps -a`: 列出所有容器（包括已停止的）。
-- **`docker images`**: 列出本地存储的所有镜像。
-- **`docker stop <container_id_or_name>`**: 停止一个正在运行的容器。
-- **`docker start <container_id_or_name>`**: 启动一个已停止的容器。
-- **`docker rm <container_id_or_name>`**: 删除一个容器。
-  - `docker rm $(docker ps -aq)`: 删除所有已停止的容器。
-- **`docker rmi <image_id_or_name>`**: 删除一个镜像。
-- **`docker logs <container_id_or_name>`**: 查看容器的日志。
-  - `docker logs -f <container_id>`: 实时跟踪日志。
-- **`docker exec -it <container_id> <command>`**: 在一个正在运行的容器内执行一个命令。
-  ```bash
-  docker exec -it my-nginx /bin/bash
-  ```
-- **`docker build -t <image_name:tag> .`**: 从当前目录的 Dockerfile 构建一个镜像。
+```bash
+# 查看 Docker 版本
+docker --version
 
-### 编写一个简单的 Dockerfile
-```Dockerfile
-# 使用官方的 Python 3.9 slim 版本作为基础镜像
-FROM python:3.9-slim
+# 拉取镜像
+docker pull ubuntu:20.04
+
+# 列出本地镜像
+docker images
+
+# 运行容器
+docker run -it --name my-ubuntu ubuntu:20.04 bash
+
+# 列出正在运行的容器
+docker ps
+
+# 列出所有容器（包括已停止的）
+docker ps -a
+
+# 启动/停止容器
+docker start my-ubuntu
+docker stop my-ubuntu
+
+# 删除容器
+docker rm my-ubuntu
+
+# 删除镜像
+docker rmi ubuntu:20.04
+```
+
+### 创建自定义镜像
+
+Dockerfile 是构建 Docker 镜像的脚本：
+
+```dockerfile
+# 基于 Ubuntu 20.04
+FROM ubuntu:20.04
+
+# 安装依赖
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip
 
 # 设置工作目录
 WORKDIR /app
 
-# 将当前目录下的 requirements.txt 复制到容器的 /app/ 目录
-COPY requirements.txt .
+# 复制应用程序到容器中
+COPY . /app
 
-# 在容器内运行 pip 命令来安装依赖
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装 Python 依赖
+RUN pip3 install -r requirements.txt
 
-# 将当前目录下的所有文件复制到容器的 /app/ 目录
-COPY . .
-
-# 暴露端口 5000
-EXPOSE 5000
-
-# 定义容器启动时要执行的命令
-CMD ["python", "app.py"]
+# 容器启动时运行的命令
+CMD ["python3", "app.py"]
 ```
 
-## 2. Podman
-
-Podman 是一个由 Red Hat 开发的容器引擎，旨在成为 Docker 的直接替代品。它的主要特点是：
-
-- **无守护进程 (Daemonless)**: Docker 依赖一个长时间运行的后台守护进程 (`dockerd`)。而 Podman 直接与容器运行时 (如 `runc`) 交互，减少了系统的复杂性和潜在的安全风险。
-- **无根模式 (Rootless)**: Podman 可以在普通用户权限下运行，无需 `root`。这极大地提高了安全性。
-- **命令兼容**: Podman 的命令与 Docker 的命令几乎完全相同。你可以直接用 `podman` 替换 `docker`。
-  ```bash
-  alias docker=podman
-  ```
-
-### 安装 Podman (以 Fedora 为例)
+构建镜像：
 ```bash
-sudo dnf install podman
+docker build -t myapp:1.0 .
 ```
 
-### 使用 Podman
-由于命令兼容，你可以参考上面的 Docker 命令列表，将 `docker` 替换为 `podman` 即可。
+## Docker Compose
+
+Docker Compose 是一个用于定义和运行多容器 Docker 应用程序的工具。通过一个 YAML 文件配置应用的服务，然后用一个命令创建并启动所有服务。
+
+### 安装 Docker Compose
 
 ```bash
-# 运行 nginx
-podman run --name my-nginx -d -p 8080:80 nginx
+# Linux
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### docker-compose.yml 示例
+
+```yaml
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
+      - POSTGRES_DB=mydb
+
+volumes:
+  postgres_data:
+```
+
+### 基本命令
+
+```bash
+# 启动服务
+docker-compose up
+
+# 后台启动服务
+docker-compose up -d
+
+# 停止服务
+docker-compose down
+
+# 查看服务状态
+docker-compose ps
+```
+
+## Podman
+
+Podman 是一个无守护进程的容器引擎，旨在作为 Docker 的替代品，特别适用于安全性要求高的环境。
+
+### Podman 的特点
+
+- **无守护进程**：不需要像 Docker 那样运行持久的守护进程
+- **无 root 权限**：可以以普通用户身份运行容器
+- **与 Docker 兼容**：命令和镜像格式与 Docker 兼容
+- **支持 Kubernetes**：生成 Kubernetes YAML 文件
+
+### 安装 Podman
+
+```bash
+# Ubuntu
+sudo apt-get update
+sudo apt-get -y install podman
+
+# CentOS
+sudo yum -y install podman
+```
+
+### 基本命令
+
+Podman 的命令与 Docker 几乎完全相同：
+
+```bash
+# 拉取镜像
+podman pull ubuntu:20.04
+
+# 运行容器
+podman run -it --name my-ubuntu ubuntu:20.04 bash
 
 # 列出正在运行的容器
 podman ps
+
+# 构建镜像
+podman build -t myapp:1.0 .
 ```
 
-## 总结
-容器化技术彻底改变了软件的开发、分发和部署方式。
-- **Docker** 是当前的事实标准，拥有最庞大的社区和生态系统。
-- **Podman** 提供了一个更安全、更现代的替代方案，特别是在注重安全性的企业环境中越来越受欢迎。
+## 容器最佳实践
 
-掌握容器化技术对于现代 Linux 系统管理员和开发者来说是一项必备技能。 
+1. **保持镜像小巧**：使用轻量级基础镜像，如 Alpine Linux
+2. **使用多阶段构建**：减少最终镜像大小
+3. **不在容器内存储数据**：使用卷（volumes）持久化数据
+4. **一个容器一个进程**：每个容器只运行一个应用或服务
+5. **使用非 root 用户**：避免容器内使用 root 权限
+6. **定期更新基础镜像**：保持安全更新
+7. **使用 .dockerignore 文件**：排除不必要的文件
+
+## 参考资源
+
+- [Docker 官方文档](https://docs.docker.com/)
+- [Podman 官方文档](https://podman.io/docs)
+- [Docker Compose 文档](https://docs.docker.com/compose/) 

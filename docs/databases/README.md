@@ -4,9 +4,9 @@
 
 ## 目前包含的内容
 
-- [MySQL数据库指南](mysql/README.md) [计划中] - MySQL配置、优化与管理
-- [Redis高性能缓存](redis/README.md) [计划中] - Redis原理与实践
-- [MongoDB文档数据库](mongodb/README.md) [计划中] - MongoDB应用与最佳实践
+- [MySQL数据库指南](mysql/README.md) - MySQL配置、优化与管理
+- [Redis高性能缓存](redis/README.md) - Redis原理与实践
+- [MongoDB文档数据库](mongodb/README.md) - MongoDB应用与最佳实践
 - [PostgreSQL关系数据库](postgresql/README.md) [计划中] - PostgreSQL高级特性与应用
 - [分布式存储系统](distributed/README.md) [计划中] - 大规模数据存储解决方案
 
