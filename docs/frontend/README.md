@@ -7,8 +7,8 @@
 - [React应用开发](react/README.md) [计划中] - React框架与生态系统
 - [Vue.js项目实战](vue/README.md) [计划中] - Vue.js技术栈与应用
 - [现代CSS技术](css/README.md) [计划中] - CSS3、Flexbox、Grid布局等
-- [响应式Web设计](responsive/README.md) [计划中] - 多设备界面适配技术
-- [前端性能优化](performance/README.md) [计划中] - Web应用加载与运行性能提升
+- [响应式Web设计](responsive-design/README.md) [计划中] - 多设备界面适配技术
+- [前端性能优化](performance/README.md) - Web应用加载与运行性能提升
 
 ## 计划添加的内容
 
