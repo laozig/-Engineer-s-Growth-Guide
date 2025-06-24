@@ -30,58 +30,61 @@
 16. [FileManager](data/filemanager.md) - 文件系统操作
 17. [SQLite 与 FMDB](data/sqlite.md) - 原生数据库操作
 18. [Realm 数据库](data/realm.md) - 替代性持久化解决方案
+19. [iOS 数据持久化概述](data/ios-data-persistence.md) - 持久化方案全面对比
+20. [文档存储](data/document-based-storage.md) - 文档驱动型应用开发
+21. [SwiftUI 与数据持久化](data/swiftui-persistence.md) - 现代UI框架的数据管理
 
 ### 第四部分：网络与异步编程
 
-19. [URLSession](networking/urlsession.md) - 网络请求基础
-20. [Codable](networking/codable.md) - JSON解析与序列化
-21. [Alamofire](networking/alamofire.md) - 网络请求框架
-22. [RESTful API 实践](networking/restful-apis.md) - API 交互设计
-23. [GCD 与 Operation](async/gcd-operations.md) - 多线程编程
-24. [Combine 框架](async/combine.md) - 响应式编程
-25. [异步/等待](async/async-await.md) - 现代并发编程
+22. [URLSession](networking/urlsession.md) - 网络请求基础
+23. [Codable](networking/codable.md) - JSON解析与序列化
+24. [Alamofire](networking/alamofire.md) - 网络请求框架
+25. [RESTful API 实践](networking/restful-apis.md) - API 交互设计
+26. [GCD 与 Operation](async/gcd-operations.md) - 多线程编程
+27. [Combine 框架](async/combine.md) - 响应式编程
+28. [异步/等待](async/async-await.md) - 现代并发编程
 
 ### 第五部分：应用架构与设计模式
 
-26. [MVC 架构](architecture/mvc.md) - 传统 iOS 架构模式
-27. [MVVM 架构](architecture/mvvm.md) - 视图模型分离模式
-28. [VIPER 架构](architecture/viper.md) - 组件化架构
-29. [协调器模式](architecture/coordinator.md) - 流程控制与导航
-30. [依赖注入](architecture/dependency-injection.md) - 解耦与测试
-31. [设计模式](architecture/design-patterns.md) - iOS 常用设计模式
+29. [MVC 架构](architecture/mvc.md) - 传统 iOS 架构模式
+30. [MVVM 架构](architecture/mvvm.md) - 视图模型分离模式
+31. [VIPER 架构](architecture/viper.md) - 组件化架构
+32. [协调器模式](architecture/coordinator.md) - 流程控制与导航
+33. [依赖注入](architecture/dependency-injection.md) - 解耦与测试
+34. [设计模式](architecture/design-patterns.md) - iOS 常用设计模式
 
 ### 第六部分：高级功能与框架
 
-32. [本地通知](advanced/local-notifications.md) - 用户提醒
-33. [远程推送](advanced/push-notifications.md) - APNS 集成
-34. [Core Location](advanced/core-location.md) - 位置服务
-35. [MapKit](advanced/mapkit.md) - 地图与导航
-36. [Core Graphics](advanced/core-graphics.md) - 绘图与动画
-37. [AVFoundation](advanced/avfoundation.md) - 媒体处理
-38. [Core ML](advanced/core-ml.md) - 机器学习集成
-39. [ARKit](advanced/arkit.md) - 增强现实开发
+35. [本地通知](advanced/local-notifications.md) - 用户提醒
+36. [远程推送](advanced/push-notifications.md) - APNS 集成
+37. [Core Location](advanced/core-location.md) - 位置服务
+38. [MapKit](advanced/mapkit.md) - 地图与导航
+39. [Core Graphics](advanced/core-graphics.md) - 绘图与动画
+40. [AVFoundation](advanced/avfoundation.md) - 媒体处理
+41. [Core ML](advanced/core-ml.md) - 机器学习集成
+42. [ARKit](advanced/arkit.md) - 增强现实开发
 
 ### 第七部分：测试与质量保证
 
-40. [XCTest 框架](testing/xctest.md) - 单元测试基础
-41. [UI 测试](testing/ui-testing.md) - 界面自动化测试
-42. [测试驱动开发](testing/tdd.md) - TDD 方法论
-43. [性能测试](testing/performance-testing.md) - 性能分析与优化
-44. [Instruments 工具](testing/instruments.md) - 高级调试工具
+43. [XCTest 框架](testing/xctest.md) - 单元测试基础
+44. [UI 测试](testing/ui-testing.md) - 界面自动化测试
+45. [测试驱动开发](testing/tdd.md) - TDD 方法论
+46. [性能测试](testing/performance-testing.md) - 性能分析与优化
+47. [Instruments 工具](testing/instruments.md) - 高级调试工具
 
 ### 第八部分：发布与分发
 
-45. [应用签名与证书](deployment/signing-certificates.md) - 签名机制详解
-46. [TestFlight](deployment/testflight.md) - Beta 测试
-47. [App Store Connect](deployment/app-store-connect.md) - 应用提交流程
-48. [持续集成](deployment/ci-cd.md) - CI/CD 工作流
-49. [应用分析](deployment/analytics.md) - 用户行为分析
+48. [应用签名与证书](deployment/signing-certificates.md) - 签名机制详解
+49. [TestFlight](deployment/testflight.md) - Beta 测试
+50. [App Store Connect](deployment/app-store-connect.md) - 应用提交流程
+51. [持续集成](deployment/ci-cd.md) - CI/CD 工作流
+52. [应用分析](deployment/analytics.md) - 用户行为分析
 
 ### 第九部分：项目实战
 
-50. [待办事项应用](projects/todo-app.md) - 构建基础任务管理应用
-51. [社交媒体客户端](projects/social-app.md) - 实现网络社交功能
-52. [电商应用](projects/e-commerce.md) - 开发完整电商平台
+53. [待办事项应用](projects/todo-app.md) - 构建基础任务管理应用
+54. [社交媒体客户端](projects/social-app.md) - 实现网络社交功能
+55. [电商应用](projects/e-commerce.md) - 开发完整电商平台
 
 ## 技术栈概览
 
@@ -140,31 +143,33 @@ graph TD
     Q --> S[UserDefaults]
     Q --> T[FileManager]
     Q --> U[Realm]
+    Q --> V[SQLite]
+    Q --> W[文档存储]
     
-    A --> V[网络编程]
-    V --> W[URLSession]
-    V --> X[Alamofire]
-    V --> Y[Codable]
+    A --> X[网络编程]
+    X --> Y[URLSession]
+    X --> Z[Alamofire]
+    X --> AA[Codable]
     
-    A --> Z[高级主题]
-    Z --> AA[多线程]
-    Z --> AB[通知推送]
-    Z --> AC[地理位置]
-    Z --> AD[音视频]
-    Z --> AE[机器学习]
-    Z --> AF[增强现实]
+    A --> AB[高级主题]
+    AB --> AC[多线程]
+    AB --> AD[通知推送]
+    AB --> AE[地理位置]
+    AB --> AF[音视频]
+    AB --> AG[机器学习]
+    AB --> AH[增强现实]
     
-    A --> AG[应用架构]
-    AG --> AH[MVC]
-    AG --> AI[MVVM]
-    AG --> AJ[VIPER]
-    AG --> AK[Clean Architecture]
+    A --> AI[应用架构]
+    AI --> AJ[MVC]
+    AI --> AK[MVVM]
+    AI --> AL[VIPER]
+    AI --> AM[Clean Architecture]
     
-    A --> AL[测试与发布]
-    AL --> AM[单元测试]
-    AL --> AN[UI测试]
-    AL --> AO[持续集成]
-    AL --> AP[App Store发布]
+    A --> AN[测试与发布]
+    AN --> AO[单元测试]
+    AN --> AP[UI测试]
+    AN --> AQ[持续集成]
+    AN --> AR[App Store发布]
 ```
 
 ## iOS 版本与特性
