@@ -58,7 +58,7 @@
 
 - [Android开发指南](docs/mobile/android/README.md) - Android应用开发与架构
 - [iOS开发教程](docs/mobile/ios/README.md) - iOS应用设计与Swift开发全面指南
-- Flutter跨平台开发 [计划中] - Flutter框架与应用
+- [Flutter跨平台开发](docs\mobile\flutter\README.md) - Flutter框架与应用
 - React Native实战 [计划中] - 使用React开发原生移动应用
 - 移动应用测试 [计划中] - 移动应用质量保证与自动化测试
 
