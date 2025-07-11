@@ -180,7 +180,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.box} />
-    </View>
+</View>
   );
 }
 
@@ -281,14 +281,14 @@ import { View, TextInput, StyleSheet, Text } from 'react-native';
 import { useState } from 'react';
 
 export default function InputExample() {
-  const [text, setText] = useState('');
-  
+const [text, setText] = useState('');
+
   return (
     <View style={styles.container}>
-      <TextInput
+<TextInput
         style={styles.input}
-        onChangeText={setText}
-        value={text}
+  onChangeText={setText}
+  value={text}
         placeholder="请输入文本..."
       />
       <Text>输入的内容: {text}</Text>
@@ -400,7 +400,7 @@ import { View, Button, StyleSheet, Alert } from 'react-native';
 export default function ButtonExample() {
   return (
     <View style={styles.container}>
-      <Button
+<Button
         title="普通按钮"
         onPress={() => Alert.alert('按钮点击')}
       />
@@ -626,8 +626,8 @@ export default function App() {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen 
           name="Home" 
-          component={HomeScreen}
-          options={{ title: '首页' }} 
+          component={HomeScreen} 
+          options={{ title: '首页' }}
         />
         <Stack.Screen 
           name="Details" 
@@ -767,15 +767,15 @@ function HomeScreen() {
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+    <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-```
+``` 
 
 ## 状态管理
 
@@ -890,10 +890,10 @@ function ThemedContent() {
       <Text style={styles.text}>
         当前模式: {isDarkMode ? '深色' : '浅色'}
       </Text>
-      <Button
+    <Button
         title="切换主题"
-        onPress={toggleTheme}
-      />
+      onPress={toggleTheme}
+    />
     </View>
   );
 }
@@ -978,8 +978,8 @@ export default function CounterScreen() {
     <View style={styles.container}>
       <Text style={styles.text}>计数: {count}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="增加" onPress={() => dispatch(increment())} />
-        <Button title="减少" onPress={() => dispatch(decrement())} />
+      <Button title="增加" onPress={() => dispatch(increment())} />
+      <Button title="减少" onPress={() => dispatch(decrement())} />
       </View>
     </View>
   );
@@ -1202,8 +1202,8 @@ const styles = StyleSheet.create({
      headers: {
        'Content-Type': 'application/json',
        'Accept': 'application/json',
-     },
-   });
+  },
+});
 
    // 请求拦截器
    API.interceptors.request.use(
@@ -1576,7 +1576,7 @@ export default function FadeInView() {
       useNativeDriver: true // 使用原生驱动提高性能
     }).start();             // 开始动画
   }, [fadeAnim]);
-
+  
   return (
     <View style={styles.container}>
       <Animated.View style={{ ...styles.box, opacity: fadeAnim }}>
@@ -2294,8 +2294,8 @@ export default function RealmExample() {
         allTasks.addListener(() => {
           setTasks([...realmInstance.objects('Task').sorted('createdAt')]);
         });
-        
-        return () => {
+    
+    return () => {
           // 组件卸载时关闭Realm并移除监听器
           const allTasks = realmInstance.objects('Task');
           allTasks.removeAllListeners();
@@ -2308,7 +2308,7 @@ export default function RealmExample() {
     
     initRealm();
   }, []);
-
+  
   // 添加任务
   const addTask = () => {
     if (taskName && realm) {
@@ -2368,7 +2368,7 @@ export default function RealmExample() {
       />
     </View>
   );
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Realm数据库示例</Text>
@@ -2812,7 +2812,7 @@ export default function MMKVExample() {
                   {typeof storedData[k] === 'string' 
                     ? `"${storedData[k]}"` 
                     : String(storedData[k])}
-                </Text>
+      </Text>
                 <Text style={styles.dataType}>
                   ({typeof storedData[k]})
                 </Text>

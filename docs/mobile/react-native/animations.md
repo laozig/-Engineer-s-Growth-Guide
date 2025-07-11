@@ -218,7 +218,7 @@ function ColorChange() {
       }}
     >
       <Animated.Text style={{ fontSize: textSize }}>
-        Hello Animation
+        动画示例文本
       </Animated.Text>
     </Animated.View>
   );
@@ -282,9 +282,18 @@ Animated.parallel([
 ```jsx
 // 延迟一定时间开始每个动画
 Animated.stagger(100, [
-  Animated.timing(anim1, { ... }),
-  Animated.timing(anim2, { ... }),
-  Animated.timing(anim3, { ... })
+  Animated.timing(anim1, { 
+    toValue: 1,
+    useNativeDriver: true,
+  }),
+  Animated.timing(anim2, { 
+    toValue: 1,
+    useNativeDriver: true,
+  }),
+  Animated.timing(anim3, { 
+    toValue: 1,
+    useNativeDriver: true,
+  })
 ]).start();
 ```
 
@@ -376,7 +385,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-### 基于手势事件的动画
+### 基于滚动事件的动画
 
 ```jsx
 import { Animated, ScrollView } from 'react-native';
@@ -394,6 +403,7 @@ function AnimatedHeader() {
     <View>
       <Animated.View style={{ height: headerHeight }}>
         {/* 头部内容 */}
+        <Text>我的标题</Text>
       </Animated.View>
       <ScrollView
         onScroll={Animated.event(
@@ -403,6 +413,9 @@ function AnimatedHeader() {
         scrollEventThrottle={16} // 约60fps
       >
         {/* 滚动内容 */}
+        <View style={{ height: 1000 }}>
+          <Text>滚动内容</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -435,7 +448,7 @@ function LayoutAnimationExample() {
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      <Button title="Toggle" onPress={toggleExpand} />
+      <Button title="切换展开" onPress={toggleExpand} />
       <View style={{
         height: expanded ? 200 : 100,
         backgroundColor: 'orange',
@@ -528,6 +541,10 @@ function GestureAnimation() {
     >
       <Animated.View
         style={{
+          width: 100,
+          height: 100,
+          backgroundColor: 'blue',
+          borderRadius: 10,
           transform: [
             { translateX },
             { translateY },
@@ -546,7 +563,7 @@ React Native Reanimated 是一个更强大的动画库，它提供了在 UI 线�
 ### 安装
 
 ```bash
-npm install react-native-reanimated@next
+npm install react-native-reanimated
 ```
 
 ### 基本用法
@@ -584,7 +601,7 @@ export default function AnimatedStyleUpdateExample() {
         onPress={() => {
           offset.value = Math.random() * 255;
         }}
-        title="Move"
+        title="移动"
       />
     </View>
   );
@@ -799,7 +816,9 @@ function MyComponent() {
     fadeIn();
   }, []);
   
-  return <Animated.View style={{ opacity }}>{/* content */}</Animated.View>;
+  return <Animated.View style={{ opacity }}>
+    <Text>内容</Text>
+  </Animated.View>;
 }
 ```
 
@@ -828,7 +847,7 @@ Animated.timing(opacity, {
   // 为 false 表示动画被中断
   if (finished) {
     // 动画完成后的逻辑
-    console.log('Animation completed');
+    console.log('动画完成');
   }
 });
 ```

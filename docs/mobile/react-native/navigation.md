@@ -121,9 +121,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home Screen</Text>
+      <Text>首页</Text>
       <Button
-        title="Go to Details"
+        title="前往详情页"
         onPress={() => navigation.navigate('Details', {
           itemId: 86,
           otherParam: '详细信息',
@@ -140,18 +140,18 @@ function DetailsScreen({ route, navigation }) {
   
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Details Screen</Text>
-      <Text>Item ID: {itemId}</Text>
-      <Text>Other Param: {otherParam}</Text>
+      <Text>详情页</Text>
+      <Text>商品ID: {itemId}</Text>
+      <Text>其他参数: {otherParam}</Text>
       <Button
-        title="Go to Details... again"
+        title="再次前往详情页"
         onPress={() => navigation.push('Details', {
           itemId: Math.floor(Math.random() * 100),
         })}
       />
-      <Button title="Go back" onPress={() => navigation.goBack()} />
+      <Button title="返回" onPress={() => navigation.goBack()} />
       <Button
-        title="Go back to first screen in stack"
+        title="返回到堆栈的第一个屏幕"
         onPress={() => navigation.popToTop()}
       />
     </View>
@@ -470,7 +470,7 @@ function MyDrawer() {
     headerRight: () => (
       <Button
         onPress={() => alert('这是一个按钮！')}
-        title="Info"
+        title="信息"
         color="#fff"
       />
     ),
@@ -530,7 +530,7 @@ function MyScreen() {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       // 屏幕获得焦点
-      console.log('Screen focused');
+      console.log('屏幕获得焦点');
     });
     
     // 清理订阅
@@ -562,7 +562,7 @@ function App() {
   return (
     <NavigationContainer
       linking={linking}
-      fallback={<Text>Loading...</Text>}
+      fallback={<Text>加载中...</Text>}
     >
       {/* ... */}
     </NavigationContainer>
@@ -793,9 +793,9 @@ function ProfileScreen({ route, navigation }: ProfileScreenProps) {
   
   return (
     <View>
-      <Text>User ID: {userId}</Text>
+      <Text>用户ID: {userId}</Text>
       <Button
-        title="Go to Home"
+        title="前往首页"
         onPress={() => navigation.navigate('Home')}
       />
     </View>
@@ -824,9 +824,9 @@ function ProfileScreen() {
   
   return (
     <View>
-      <Text>User ID: {userId}</Text>
+      <Text>用户ID: {userId}</Text>
       <Button
-        title="Go to Home"
+        title="前往首页"
         onPress={() => navigation.navigate('Home')}
       />
     </View>
@@ -867,7 +867,7 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Root" component={BottomTabNavigator} />
-      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
+      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: '页面不存在！' }} />
     </Stack.Navigator>
   );
 }
@@ -913,7 +913,7 @@ navigation.navigate(ROUTES.PROFILE, { userId: '123' });
 // 不推荐 - 内联函数会导致组件重新渲染
 <Button
   onPress={() => navigation.navigate('Details')}
-  title="Go to Details"
+  title="前往详情页"
 />
 
 // 推荐 - 使用 useCallback
@@ -923,7 +923,7 @@ const goToDetails = useCallback(() => {
 
 <Button
   onPress={goToDetails}
-  title="Go to Details"
+  title="前往详情页"
 />
 ```
 
@@ -982,9 +982,9 @@ export default function App() {
 const HomeScreen = React.memo(function HomeScreen({ navigation }) {
   return (
     <View>
-      <Text>Home Screen</Text>
+      <Text>首页</Text>
       <Button
-        title="Go to Details"
+        title="前往详情页"
         onPress={() => navigation.navigate('Details')}
       />
     </View>
@@ -996,6 +996,4 @@ const HomeScreen = React.memo(function HomeScreen({ navigation }) {
 
 React Navigation 是一个功能强大且灵活的导航库，可以帮助您构建从简单到复杂的各种导航结构。通过组合不同类型的导航器，您可以创建符合现代移动应用标准的用户体验。
 
-本文档介绍了 React Navigation 的基础概念和高级功能，包括堆栈导航、选项卡导航、参数传递、嵌套导航等。掌握这些知识点，可以帮助您设计和实现出用户友好的导航系统。
-
-随着应用的发展，可能需要进一步探索 React Navigation 的高级特性，如状态持久化、深层链接和导航生命周期，以满足更复杂的需求。 
+本文档介绍了 React Navigation 的基础概念和高级功能，包括堆栈导航、选项卡导航、参数传递、嵌套导航等。掌握这些知识点，可以帮助您设计和实现出用户友好的导航系统。 

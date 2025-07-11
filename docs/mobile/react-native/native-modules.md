@@ -137,7 +137,7 @@ protected List<ReactPackage> getPackages() {
 import { NativeModules } from 'react-native';
 const { ToastExample } = NativeModules;
 
-ToastExample.show('Hello from Native Code', ToastExample.DURATION_SHORT);
+ToastExample.show('来自原生代码的问候', ToastExample.DURATION_SHORT);
 ```
 
 ### 数据类型映射（Android）
@@ -217,7 +217,7 @@ RCT_EXPORT_MODULE();
 // 导出常量
 - (NSDictionary *)constantsToExport
 {
-  return @{ @"DEFAULT_EVENT_NAME": @"New Event" };
+  return @{ @"DEFAULT_EVENT_NAME": @"新事件" };
 }
 
 // 导出方法
@@ -269,7 +269,7 @@ class CalendarModule: NSObject {
   @objc
   func constantsToExport() -> [String: Any] {
     return [
-      "DEFAULT_EVENT_NAME": "New Event"
+      "DEFAULT_EVENT_NAME": "新事件"
     ]
   }
   
@@ -421,7 +421,7 @@ RCT_EXPORT_MODULE()
 - (UIView *)view
 {
   CustomButtonView *button = [CustomButtonView buttonWithType:UIButtonTypeSystem];
-  [button setTitle:@"Button" forState:UIControlStateNormal];
+  [button setTitle:@"按钮" forState:UIControlStateNormal];
   return button;
 }
 
@@ -483,7 +483,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <CustomButton
-        text="Custom Native Button"
+        text="自定义原生按钮"
         color="#FFFFFF"
         backgroundColor="#2196F3"
         style={styles.button}

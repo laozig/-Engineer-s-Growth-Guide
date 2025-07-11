@@ -111,7 +111,7 @@ function ParentComponent() {
   
   // 只有当 count 改变时才创建新函数
   const handleClick = useCallback(() => {
-    console.log(`Count: ${count}`);
+    console.log(`计数: ${count}`);
   }, [count]);
   
   return <ChildComponent onClick={handleClick} />;
@@ -251,8 +251,8 @@ class MyPureComponent extends React.PureComponent {
 function BadComponent() {
   return (
     <View>
-      <Text>Item 1</Text>
-      <Text>Item 2</Text>
+      <Text>项目 1</Text>
+      <Text>项目 2</Text>
     </View>
   );
 }
@@ -261,8 +261,8 @@ function BadComponent() {
 function GoodComponent() {
   return (
     <>
-      <Text>Item 1</Text>
-      <Text>Item 2</Text>
+      <Text>项目 1</Text>
+      <Text>项目 2</Text>
     </>
   );
 }
@@ -476,9 +476,9 @@ function UserProfile({ userId }) {
   });
   
   if (isLoading) return <ActivityIndicator />;
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (error) return <Text>错误: {error.message}</Text>;
   
-  return <Text>Hello, {data.name}</Text>;
+  return <Text>你好, {data.name}</Text>;
 }
 ```
 
@@ -500,7 +500,7 @@ function SearchComponent() {
         const data = await response.json();
         setResults(data);
       } catch (error) {
-        console.error('Search failed:', error);
+        console.error('搜索失败:', error);
       }
     }, 500), // 500ms 防抖时间
     []
@@ -516,7 +516,7 @@ function SearchComponent() {
       <TextInput
         value={searchTerm}
         onChangeText={handleSearch}
-        placeholder="Search..."
+        placeholder="搜索..."
       />
       <FlatList
         data={results}
@@ -690,7 +690,7 @@ function AnimatedBox() {
   return (
     <View>
       <Animated.View style={[styles.box, animatedStyles]} />
-      <Button onPress={handlePress} title="Move" />
+      <Button onPress={handlePress} title="移动" />
     </View>
   );
 }
@@ -732,6 +732,9 @@ function MyComponent() {
   
   return (
     // 渲染组件
+    <View>
+      {data ? <DataDisplay data={data} /> : <LoadingPlaceholder />}
+    </View>
   );
 }
 ```
@@ -776,7 +779,7 @@ import { AppRegistry, Text } from 'react-native';
 function App() {
   return (
     <View>
-      <Text>App loaded</Text>
+      <Text>应用已加载</Text>
     </View>
   );
 }
@@ -820,7 +823,7 @@ function App() {
   
   return (
     <Text style={{ fontFamily: 'custom-font' }}>
-      Text with custom font
+      使用自定义字体的文本
     </Text>
   );
 }
@@ -857,7 +860,7 @@ import { getTurboModule } from 'react-native/Libraries/TurboModule/TurboModuleRe
 const CalendarModule = getTurboModule('CalendarModule');
 
 // 使用模块
-CalendarModule.createCalendarEvent('Meeting', 'Conference Room');
+CalendarModule.createCalendarEvent('会议', '会议室');
 ```
 
 ## 新架构的性能提升
@@ -914,7 +917,7 @@ function measureFunction() {
   expensiveOperation();
   
   performance.mark('functionEnd');
-  performance.measure('Function Execution', 'functionStart', 'functionEnd');
+  performance.measure('函数执行', 'functionStart', 'functionEnd');
 }
 ```
 

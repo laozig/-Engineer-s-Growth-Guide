@@ -4,7 +4,7 @@
 
 ## 目前包含的内容
 
-- [AWS云服务](aws/README.md) [计划中] - Amazon Web Services使用指南
+- [AWS云服务](aws/README.md) ✅ 已完成 - Amazon Web Services使用指南
 - [Azure平台应用](azure/README.md) [计划中] - Microsoft Azure服务与解决方案
 - [微服务架构](microservices/README.md) [计划中] - 微服务设计与实现
 - [Serverless架构](serverless/README.md) [计划中] - 无服务器应用开发
