@@ -64,9 +64,9 @@
 
 ### 云计算与架构
 
-- [AWS云服务](docs/cloud/aws/README.md) ✅ 已完成 - Amazon Web Services使用指南
-- Azure平台应用 [计划中] - Microsoft Azure服务与解决方案
-- 微服务架构 [计划中] - 微服务设计与实现
+- [AWS云服务](docs/cloud/aws/README.md) - Amazon Web Services使用指南
+- [Azure平台应用](docs\cloud\README.md) - Microsoft Azure服务与解决方案
+- [微服务架构](docs/cloud/microservices/README.md) - 微服务设计、实现、安全与监控
 - Serverless架构 [计划中] - 无服务器应用开发
 - DevOps实践指南 [计划中] - 开发与运维协作流程
 

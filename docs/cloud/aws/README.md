@@ -6,34 +6,34 @@
 
 - [AWS入门基础](introduction.md) - 云计算概念与AWS简介
 - [账户管理与安全](account-setup.md) - 设置组织、账户、IAM用户与角色
-- [AWS全球基础设施](global-infrastructure.md) ✅ 已完成 - 区域、可用区与本地区域
-- [AWS价格模式](pricing-model.md) ✅ 已完成 - 按需、预留、Savings Plans与现货实例
+- [AWS全球基础设施](global-infrastructure.md) - 区域、可用区与本地区域
+- [AWS价格模式](pricing-model.md) - 按需、预留、Savings Plans与现货实例
 
 ## 2. 核心服务
 
 ### 计算服务
 - [EC2实例详解](compute/ec2.md) - 弹性计算云
-- [Lambda无服务器计算](compute/lambda.md) ✅ 已完成 - 事件驱动计算
-- [ECS容器服务](compute/ecs.md) ✅ 已完成 - Docker容器编排
-- [EKS Kubernetes服务](compute/eks.md) ✅ 已完成 - 托管Kubernetes
-- [Fargate无服务器容器](compute/fargate.md) ✅ 已完成 - 无需管理服务器的容器运行环境
+- [Lambda无服务器计算](compute/lambda.md) - 事件驱动计算
+- [ECS容器服务](compute/ecs.md) - Docker容器编排
+- [EKS Kubernetes服务](compute/eks.md) - 托管Kubernetes
+- [Fargate无服务器容器](compute/fargate.md) - 无需管理服务器的容器运行环境
 
 ### 存储服务
-- [S3对象存储](storage/s3.md) ✅ 已完成 - 简单存储服务
-- [EBS块存储](storage/ebs.md) ✅ 已完成 - 弹性块存储
+- [S3对象存储](storage/s3.md) - 简单存储服务
+- [EBS块存储](storage/ebs.md) - 弹性块存储
 - [EFS文件系统](storage/efs.md) - 弹性文件系统
 - [S3 Glacier归档存储](storage/glacier.md) - 长期归档解决方案
-- [Storage Gateway混合存储](storage/storage-gateway.md) ✅ 已完成 - 混合云存储
+- [Storage Gateway混合存储](storage/storage-gateway.md) - 混合云存储
 
 ### 数据库服务
-- [RDS关系型数据库](database/rds.md) ✅ 已完成 - 托管关系数据库服务
-- [DynamoDB NoSQL数据库](database/dynamodb.md) ✅ 已完成 - 可扩展性NoSQL数据库
-- [ElastiCache内存缓存](database/elasticache.md) ✅ 已完成 - Redis与Memcached
-- [Aurora高性能数据库](database/aurora.md) ✅ 已完成 - MySQL和PostgreSQL兼容
-- [Redshift数据仓库](database/redshift.md) ✅ 已完成 - 数据仓库与分析
+- [RDS关系型数据库](database/rds.md) - 托管关系数据库服务
+- [DynamoDB NoSQL数据库](database/dynamodb.md) - 可扩展性NoSQL数据库
+- [ElastiCache内存缓存](database/elasticache.md) - Redis与Memcached
+- [Aurora高性能数据库](database/aurora.md) - MySQL和PostgreSQL兼容
+- [Redshift数据仓库](database/redshift.md) - 数据仓库与分析
 
 ### 网络服务
-- [VPC虚拟私有云](networking/vpc.md) ✅ 已完成 - 虚拟网络
+- [VPC虚拟私有云](networking/vpc.md) - 虚拟网络
 - [Route 53 DNS服务](networking/route53.md) - DNS与域名管理
 - [CloudFront内容分发](networking/cloudfront.md) - CDN服务
 - [ELB负载均衡器](networking/elb.md) - 应用与网络负载均衡

@@ -103,10 +103,10 @@ Microsoft Azure是微软的云计算平台，提供了丰富的服务和解决�
 ## 微服务架构
 
 - **[微服务架构设计与实现](microservices/design-implementation.md)** - 微服务设计原则和实现方法
-- **[微服务通信模式](microservices/communication-patterns.md)** [计划中] - 同步和异步通信模式
-- **[微服务数据管理](microservices/data-management.md)** [计划中] - 数据一致性和查询模式
-- **[微服务安全](microservices/security.md)** [计划中] - 认证、授权和API安全
-- **[微服务监控与可观测性](microservices/monitoring.md)** [计划中] - 日志、指标和分布式追踪
+- **[微服务通信模式](microservices/communication-patterns.md)** - 同步和异步通信模式
+- **[微服务数据管理](microservices/data-management.md)** - 数据一致性和查询模式
+- **[微服务安全](microservices/security.md)** - 认证、授权和API安全
+- **[微服务监控与可观测性](microservices/monitoring.md)** - 日志、指标和分布式追踪
 
 ## 文档状态
 
@@ -163,6 +163,7 @@ Microsoft Azure是微软的云计算平台，提供了丰富的服务和解决�
 | [监控与诊断](azure/best-practices/monitoring.md) | ✅ 已完成 |
 | [灾难恢复](azure/best-practices/disaster-recovery.md) | ✅ 已完成 |
 | [微服务架构设计与实现](microservices/design-implementation.md) | ✅ 已完成 |
+| [微服务通信模式](microservices/communication-patterns.md) | ✅ 已完成 |
 | 其他解决方案架构相关文档 | 🔄 计划中 |
 
 ## 学习路径
